@@ -1,0 +1,17 @@
+@import "tailwindcss"; 
+
+@theme {
+  --color-primary: #004AAD;
+  --color-primary-dark: #003C7E;
+  --color-primary-light: #0053C7;
+  --color-secondary: #F9C34A;
+}
+
+@import './base.css';
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-family: "Raleway", serif;
+}
