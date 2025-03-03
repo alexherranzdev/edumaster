@@ -20,7 +20,7 @@ class WorksheetResponseController
 
     $this->service->execute(
       $worksheetId,
-      $request->user()->user_id,
+      $request->user()->user_id->value(),
       $validated['responses']
     );
 

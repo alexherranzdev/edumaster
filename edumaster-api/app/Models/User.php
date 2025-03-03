@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use Edumaster\Learning\User\Domain\ValueObject\UserId;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -65,5 +67,15 @@ class User extends Authenticatable
     public function worksheets()
     {
         return $this->hasMany(Worksheet::class, 'teacher_id', 'user_id');
+    }
+
+    public function getUserIdAttribute($value): UserId
+    {
+        return new UserId($value);
+    }
+
+    public function setUserIdAttribute(UserId $value): void
+    {
+        $this->attributes['user_id'] = $value->value();
     }
 }

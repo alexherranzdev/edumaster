@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace Edumaster\Learning\User\Domain;
 
+use Database\Factories\UserFactory;
+use Edumaster\Learning\User\Domain\ValueObject\UserId;
 use Edumaster\Shared\Traits\HasUuid;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-  use HasApiTokens, HasUuid;
+  use HasApiTokens, HasUuid, HasFactory;
 
   protected $keyType = 'int';
   public $incrementing = true;
@@ -22,6 +25,7 @@ class User extends Authenticatable
     'remember_token',
   ];
 
+
   public function isTeacher(): bool
   {
     return $this->role === 'teacher';
@@ -30,5 +34,10 @@ class User extends Authenticatable
   public function isStudent(): bool
   {
     return $this->role === 'student';
+  }
+
+  protected static function newFactory()
+  {
+    return UserFactory::new();
   }
 }

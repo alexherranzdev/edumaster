@@ -40,7 +40,7 @@ class WorksheetController
       $validated['title'],
       $validated['description'],
       $validated['questions'],
-      $request->user()->user_id
+      $request->user()->user_id->value()
     );
 
     $worksheet = $this->createWorksheetService->execute($createRequest);
@@ -63,7 +63,7 @@ class WorksheetController
     }
 
     $worksheets = $this->listWorksheetsService->execute(
-      $request->user()->user_id,
+      $request->user()->user_id->value(),
       $request->user()->role,
       (int)$request->query('limit', 10),
       (int)$request->query('offset', 0),
@@ -101,7 +101,7 @@ class WorksheetController
         $validated['title'],
         $validated['description'],
         $validated['questions'],
-        $request->user()->user_id
+        $request->user()->user_id->value()
       );
 
       $this->updateWorksheetService->execute($id, $updateRequest);

@@ -30,4 +30,9 @@ abstract class Uuid implements Stringable
   {
     return $this->id === (string) $other;
   }
+
+  public static function generate(): self
+  {
+    return new static();
+  }
 }
