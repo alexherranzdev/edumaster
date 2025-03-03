@@ -14,7 +14,7 @@ class EloquentWorksheet extends Model
 
   protected $table = 'worksheets';
 
-  protected $fillable = ['worksheet_id', 'title', 'description', 'words', 'correct_word', 'teacher_id'];
+  protected $fillable = ['worksheet_id', 'teacher_id', 'title', 'description'];
 
   protected $casts = [
     'words' => 'array',

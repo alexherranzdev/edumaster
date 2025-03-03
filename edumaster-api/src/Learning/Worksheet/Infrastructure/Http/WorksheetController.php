@@ -27,6 +27,10 @@ class WorksheetController
 
   public function store(Request $request): JsonResponse
   {
+    if ($request->user()->role !== 'teacher') {
+      return response()->json(['message' => 'Unauthorized'], 403);
+    }
+
     $validated = $request->validate([
       'title' => 'required|string|max:255',
       'description' => 'nullable|string',
@@ -73,19 +77,24 @@ class WorksheetController
     return response()->json($worksheets);
   }
 
-  public function destroy(string $id): JsonResponse
+  public function destroy(Request $request, string $id): JsonResponse
   {
-    try {
-      $this->deleteWorksheetService->execute($id);
-    } catch (\Exception $e) {
-      // TODO: Not found
+
+    if ($request->user()->role !== 'teacher') {
+      return response()->json(['message' => 'Unauthorized'], 403);
     }
+
+    $this->deleteWorksheetService->execute($id);
 
     return response()->json(null, 204);
   }
 
   public function update(Request $request, string $id): JsonResponse
   {
+    if ($request->user()->role !== 'teacher') {
+      return response()->json(['message' => 'Unauthorized'], 403);
+    }
+
     try {
       $validated = $request->validate([
         'title' => 'required|string|max:255',
