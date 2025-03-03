@@ -16,20 +16,16 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $now = Carbon::now();
-
-        // Crear un usuario profesor
         User::create([
-            'user_id' => (new UserId())->value(),
+            'user_id' => new UserId(),
             'name' => 'Teacher',
             'email' => 'teacher@edumaster.dev',
             'password' => Hash::make('password'),
             'role' => 'teacher',
         ]);
 
-        // Crear un usuario estudiante
         User::create([
-            'user_id' => (new UserId())->value(),
+            'user_id' => new UserId(),
             'name' => 'Student',
             'email' => 'student@edumaster.dev',
             'password' => Hash::make('password'),
