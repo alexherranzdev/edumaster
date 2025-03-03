@@ -14,13 +14,14 @@ class StatsController extends Controller
         $totalStudents = 0;
         $totalWorksheets = Worksheet::count();
 
-        if ($request->user()->role === 'teacher') {
+        if ($request->user()->role === 'student' || ($request->has('student_id') && $request->user()->role === 'teacher')) {
+            $userId = $request->has('student_id') ? $request->input('student_id') : $request->user()->user_id;
+            $totalInProgressWorksheets = EloquentWorksheetStudent::where('status', 'in_progress')->where('student_id', $userId)->count();
+            $totalCompletedWorksheets = EloquentWorksheetStudent::where('status', 'completed')->where('student_id', $userId)->count();
+        } else {
             $totalStudents = User::where('role', 'student')->count();
             $totalInProgressWorksheets = EloquentWorksheetStudent::where('status', 'in_progress')->count();
             $totalCompletedWorksheets = EloquentWorksheetStudent::where('status', 'completed')->count();
-        } else {
-            $totalInProgressWorksheets = EloquentWorksheetStudent::where('status', 'in_progress')->where('student_id', $request->user()->user_id)->count();
-            $totalCompletedWorksheets = EloquentWorksheetStudent::where('status', 'completed')->where('student_id', $request->user()->user_id)->count();
         }
 
         $response = [
