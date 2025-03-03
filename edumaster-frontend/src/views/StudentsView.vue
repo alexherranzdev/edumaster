@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import api from '../services/api'
 import { useAuthStore } from '../stores/auth'
 import MainLayout from '../layouts/MainLayout.vue'
+import KPI from '../components/KPI.vue'
 
 const authStore = useAuthStore()
 
@@ -15,6 +16,8 @@ const errorFormMessage = ref(null)
 const showModal = ref(false)
 const newUser = ref({ name: '', email: '', password: '', role: 'student' })
 const errorsForm = {}
+const totalCompletedWorksheets = ref(0)
+const totalInProgressWorksheets = ref(0)
 
 const fetchStudents = async () => {
   try {
@@ -27,10 +30,34 @@ const fetchStudents = async () => {
   }
 }
 
+const fetchTotals = async (userId) => {
+  try {
+    const response = await api.get(`/stats/totals?student_id=${userId}`)
+    totalInProgressWorksheets.value = response.data.total_in_progress_worksheets
+    totalCompletedWorksheets.value = response.data.total_completed_worksheets
+  } catch (error) {
+    if (error.status === 401) {
+      useAuthStore().logout()
+      window.location.reload()
+    }
+    
+    console.error('Failed to fetch totals:', error)
+  }
+}
+
+const closeModal = () => {
+  isViewing.value = false
+  showModal.value = false
+  totalInProgressWorksheets.value = 0
+  totalCompletedWorksheets.value = 0
+}
+
 const openViewModal = (student) => {
   isViewing.value = true
   errorFormMessage.value = null
   newUser.value = {...student}
+  fetchTotals(student.user_id)
+  
   showModal.value = true
 }
 
@@ -133,14 +160,14 @@ onMounted(fetchStudents)
               <button
                 v-if="authStore.isTeacher"
                 @click="openViewModal(student)"
-                class="px-3 py-1 text-sm text-white rounded-md bg-primary hover:bg-primary-dark"
+                class="px-3 py-1 text-sm text-white rounded-md cursor-pointer bg-primary hover:bg-primary-dark"
               >
                 Ver
               </button>
               <button
                 v-if="authStore.isTeacher"
                 @click="handleDelete(student)"
-                class="px-3 py-1 text-sm text-white rounded-md bg-rose-500 hover:bg-rose-600" 
+                class="px-3 py-1 text-sm text-white rounded-md cursor-pointer bg-rose-500 hover:bg-rose-600" 
               >
                 Eliminar
               </button>
@@ -158,6 +185,10 @@ onMounted(fetchStudents)
         <h3 class="mb-4 text-xl font-semibold">
           {{ isViewing ? 'Detalles del alumno' : 'Nuevo alumno' }}
         </h3>
+        <section class="grid grid-cols-1 gap-6 mb-6 md:grid-cols-2 lg:grid-cols-4" v-if="isViewing">
+          <KPI title="Fichas empezadas" :value="totalInProgressWorksheets" />
+          <KPI title="Fichas completadas" :value="totalCompletedWorksheets" />
+        </section>
         <div class="flex flex-col mb-4 gap-y-2">
           <label class="block mb-2 text-sm font-bold text-gray-700">Nombre</label>
           <input
@@ -194,15 +225,15 @@ onMounted(fetchStudents)
 
         <div class="flex justify-end gap-x-2">
           <button
-            @click="showModal = false"
-            class="px-4 py-2 mr-2 text-white transition bg-gray-400 rounded-lg hover:bg-gray-500"
+            @click="closeModal"
+            class="px-4 py-2 mr-2 text-white transition bg-gray-400 rounded-lg cursor-pointer hover:bg-gray-500"
           >
             Cancelar
           </button>
           <button
             @click="saveUser"
             :disabled="isSaving"
-            class="px-4 py-2 text-white transition rounded-lg bg-primary hover:bg-primary-dark"
+            class="px-4 py-2 text-white transition rounded-lg cursor-pointer bg-primary hover:bg-primary-dark"
             :class="{ 'opacity-50 cursor-not-allowed': isSaving }"
           >
             {{ isSaving ? 'Guardando...' : 'Guardar' }}
