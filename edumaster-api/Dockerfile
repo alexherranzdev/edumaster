@@ -18,6 +18,8 @@ WORKDIR /var/www
 # Copiar archivos de la API
 COPY . .
 
+COPY .env.docker .env
+
 # Instalar dependencias de PHP con Composer
 RUN composer install --no-dev --optimize-autoloader
 
