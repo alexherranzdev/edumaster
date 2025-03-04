@@ -68,7 +68,7 @@ const login = async () => {
         <button
           type="button"
           @click="login"
-          disabled="isLoading"
+          :disabled="isLoading"
           class="w-full px-4 py-2 font-semibold text-white rounded-md bg-primary hover:bg-blue-600"
           :class="{ 'cursor-not-allowed opacity-50': isLoading }"
         >
