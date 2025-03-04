@@ -1,19 +1,15 @@
+.PHONY: start stop
+
+DOCKER_COMPOSE = docker-compose
+
 start:
-	docker-compose up --build -d
-	docker exec -it edumaster-frontend npm install
-	docker exec -it edumaster-frontend npm run build
+	@echo "🚀 Construyendo los contenedores..."
+	$(DOCKER_COMPOSE) build --no-cache
+	@echo "📦 Levantando los contenedores..."
+	$(DOCKER_COMPOSE) up -d
+	@echo "✅ Proyecto levantado correctamente."
 
 stop:
-	docker-compose down
-
-migrate:
-	docker exec -it edumaster-api php artisan migrate --force
-	docker exec -it edumaster-api php artisan db:seed --force
-
-fresh:
-	docker exec -it edumaster-api php artisan migrate:fresh --force
-	docker exec -it edumaster-api php artisan db:seed --force
-
-frontend:
-	docker exec -it edumaster-frontend npm install
-	docker exec -it edumaster-frontend npm run dev
+	@echo "🛑 Deteniendo y eliminando los contenedores..."
+	$(DOCKER_COMPOSE) down
+	@echo "✅ Contenedores detenidos y eliminados."
