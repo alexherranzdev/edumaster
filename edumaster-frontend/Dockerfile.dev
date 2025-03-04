@@ -1,0 +1,19 @@
+# Usamos Node 20 con Alpine
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copiamos solo package.json y package-lock.json para instalar dependencias
+COPY package*.json ./
+RUN npm install
+
+# Copiamos el resto del código
+COPY . .
+
+RUN npm run build
+
+# Exponemos el puerto de Vite
+EXPOSE 5173
+
+# Ejecutamos el modo desarrollo
+CMD ["npm", "run", "preview", "--", "--host"]

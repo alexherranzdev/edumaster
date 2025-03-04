@@ -1,14 +1,19 @@
 start:
 	docker-compose up --build -d
+	docker exec -it edumaster-frontend npm install
+	docker exec -it edumaster-frontend npm run build
 
 stop:
 	docker-compose down
 
-restart:
-	docker-compose down && docker-compose up --build -d
-
-logs:
-	docker-compose logs -f
-
 migrate:
-	docker exec -it edumaster-api php artisan migrate --force && php artisan db:seed --force
+	docker exec -it edumaster-api php artisan migrate --force
+	docker exec -it edumaster-api php artisan db:seed --force
+
+fresh:
+	docker exec -it edumaster-api php artisan migrate:fresh --force
+	docker exec -it edumaster-api php artisan db:seed --force
+
+frontend:
+	docker exec -it edumaster-frontend npm install
+	docker exec -it edumaster-frontend npm run dev

@@ -1,77 +1,132 @@
 version: '3.8'
 
 services:
-  app:
-    build:
-      context: ./edumaster-api
-      dockerfile: Dockerfile
-    container_name: edumaster-api
-    restart: unless-stopped
-    working_dir: /var/www
-    volumes:
-      - ./edumaster-api:/var/www
-      - /var/www/vendor
-      - /var/www/storage
-    networks:
-      - edumaster-network
-    depends_on:
-      - db
-    env_file:
-      - ./edumaster-api/.env
-    command: >
-      sh -c "php artisan migrate --force &&
-             php artisan db:seed --force &&
-             php artisan cache:clear &&
-             php artisan config:clear &&
-             php artisan route:clear &&
-             php artisan serve --host=0.0.0.0 --port=8000"
-
-  db:
+  edumaster-db:
     image: mysql:8.0
     container_name: edumaster-db
-    restart: unless-stopped
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: edumaster
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
-    volumes:
-      - db-data:/var/lib/mysql
+      MYSQL_USER: edumaster
+      MYSQL_PASSWORD: secret
     ports:
       - '3306:3306'
     networks:
       - edumaster-network
+  edumaster-api:
+    build:
+      context: ./edumaster-api
+    container_name: edumaster-api
+    restart: always
+    volumes:
+      - ./edumaster-api:/var/www
+    depends_on:
+      - edumaster-db
+    networks:
+      - edumaster-network
+    env_file:
+      - ./edumaster-api/.env.docker
 
-  nginx:
+  edumaster-frontend:
+    build:
+      context: ./edumaster-frontend
+      dockerfile: Dockerfile.dev
+    container_name: edumaster-frontend
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./edumaster-frontend:/app
+      - /app/node_modules
+    ports:
+      - '5173:5173'
+    command: npm run dev -- --host
+
+  edumaster-nginx:
     image: nginx:alpine
     container_name: edumaster-nginx
-    restart: unless-stopped
-    ports:
-      - '8000:80'
+    restart: always
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
-      - app
-    networks:
-      - edumaster-network
-
-  frontend:
-    build:
-      context: ./edumaster-frontend
-      dockerfile: Dockerfile
-    container_name: edumaster-frontend
-    restart: unless-stopped
+      - edumaster-api
+      - edumaster-frontend
     ports:
-      - '5173:80'
+      - '8000:80'
     networks:
       - edumaster-network
-    depends_on:
-      - app
-    environment:
-      - VITE_API_URL=http://edumaster-api:8000
 
-volumes:
-  db-data:
+  # app:
+  #   build:
+  #     context: ./edumaster-api
+  #     dockerfile: Dockerfile
+  #   container_name: edumaster-api
+  #   restart: unless-stopped
+  #   working_dir: /var/www
+  #   volumes:
+  #     - ./edumaster-api:/var/www
+  #     - /var/www/vendor
+  #     - /var/www/storage
+  #   ports:
+  #     - '9000:9000'
+  #   networks:
+  #     - edumaster-network
+  #   depends_on:
+  #     - db
+  #   env_file:
+  #     - ./edumaster-api/.env.docker
+  #   command: >
+  #     sh -c "php artisan serve --host=0.0.0.0 --port=8000"
+
+  # db:
+  #   image: mysql:8.0
+  #   container_name: edumaster-db
+  #   restart: unless-stopped
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: root
+  #     MYSQL_DATABASE: edumaster
+  #     MYSQL_USER: user
+  #     MYSQL_PASSWORD: password
+  #   volumes:
+  #     - db-data:/var/lib/mysql
+  #   ports:
+  #     - '3306:3306'
+  #   networks:
+  #     - edumaster-network
+
+  # nginx:
+  #   image: nginx:stable-alpine
+  #   container_name: edumaster-nginx
+  #   restart: unless-stopped
+  #   ports:
+  #     - '80:80'
+  #   volumes:
+  #     - ./src:/var/www/html
+  #     - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+  #   depends_on:
+  #     - app
+  #   networks:
+  #     - edumaster-network
+
+  # frontend:
+  #   build:
+  #     context: ./edumaster-frontend
+  #     dockerfile: Dockerfile
+  #     target: development
+  #   container_name: edumaster-frontend
+  #   restart: unless-stopped
+  #   ports:
+  #     - '5173:80'
+  #   networks:
+  #     - edumaster-network
+  #   depends_on:
+  #     - app
+  #   environment:
+  #     - VITE_API_URL=http://edumaster-api:8000
+  #   command: ['npm', 'run', 'dev']
+
+# volumes:
+#   db-data:
 
 networks:
   edumaster-network:
