@@ -79,7 +79,7 @@ class EloquentWorksheetRepository implements WorksheetRepository
       $worksheets->where($filter['field'], $filter['operator'], $filter['value']);
     }
 
-    $worksheets->limit($limit + 1)
+    $worksheets = $worksheets->limit($limit + 1)
       ->offset($offset)
       ->get();
 
