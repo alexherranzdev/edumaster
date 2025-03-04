@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->uuid('teacher_id');
-            $table->foreign('teacher_id')->references('user_id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
