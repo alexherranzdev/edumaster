@@ -392,18 +392,8 @@ onMounted(fetchWorksheets)
     </div>
 
     <div class="flex justify-end gap-x-2">
-      <button
-        @click="showModal = false"
-        class="px-4 py-2 mr-2 text-white transition bg-gray-400 rounded-lg hover:bg-gray-500"
-      >
-        Cancelar
-      </button>
-      <button
-        @click="saveWorksheet"
-        class="px-4 py-2 text-white transition rounded-lg bg-primary hover:bg-primary-dark"
-      >
-        Guardar
-      </button>
+      <Button @click="showModal = false" type="default">Cancelar</Button>
+      <Button @click="saveWorksheet">Guardar</Button>
     </div>
   </div>
 </div>
@@ -443,18 +433,8 @@ onMounted(fetchWorksheets)
     
 
     <div class="flex justify-end gap-x-2">
-      <button
-        @click="showSubmitModal = false"
-        class="px-4 py-2 mr-2 text-white transition bg-gray-400 rounded-lg hover:bg-gray-500"
-      >
-        Cancelar
-      </button>
-      <button
-        @click="handleSubmitResponse"
-        class="px-4 py-2 text-white transition rounded-lg bg-primary hover:bg-primary-dark"
-      >
-        Enviar
-      </button>
+      <Button @click="showSubmitModal = false" type="default">Cancelar</Button>
+      <Button @click="handleSubmitResponse">Enviar</Button>
     </div>
   </div>
 </div>
