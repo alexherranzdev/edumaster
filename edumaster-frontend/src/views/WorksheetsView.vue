@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { v4 as uuidv4 } from "uuid"
 import api from '../services/api'
@@ -15,10 +15,13 @@ const router = useRouter()
 const worksheets = ref([])
 const isLoading = ref(true)
 const errorMessage = ref(null)
+const errorMessageForm = ref(null)
 const showModal = ref(false)
 const showSubmitModal = ref(false)
+const showStudentScoreModal = ref(false)
 const isViewing = ref(false)
 const isSubmit = ref(false)
+const expandedWorksheet = ref(null)
 const newWorksheet = ref({
   worksheet_id: null,
   title: '',
@@ -26,10 +29,16 @@ const newWorksheet = ref({
   questions: [],
   correct_word: ''
 })
+const studentScore = ref({})
 const limit = 10
 const offset = ref(route.query.page ? (parseInt(route.query.page) - 1) * limit : 0)
 const hasMore = ref(false)
 const selectedWord = ref({})
+
+const hideShowModal = () => {
+  showModal.value = false
+  errorMessageForm.value = null
+}
 
 const addQuestion = (worksheet) => {
   if (!worksheet.questions) {
@@ -62,8 +71,11 @@ const fetchWorksheets = async () => {
   isLoading.value = true
   try {
     let url = `/worksheets?limit=${limit}&offset=${offset.value}`
+
     if (authStore.isStudent) {
       url += `&with=responses`
+    } else {
+      url += `&with=responses.student,responses.question`
     }
 
     const response = await api.get(url)
@@ -115,6 +127,8 @@ const createWorksheet = async () => {
     fetchWorksheets()
   } catch (error) {
     console.error('Error creating worksheet:', error)
+    const errorData = error.response.data
+    errorMessageForm.value = errorData.message
   }
 }
 
@@ -131,6 +145,71 @@ const saveWorksheet = async () => {
   } else {
     await createWorksheet(newWorksheet.value)
   }
+}
+
+const hideResponsesTable = () => {
+  expandedWorksheet.value = null
+}
+
+const hideStudentScoreModal = () => {
+  showStudentScoreModal.value = false
+  studentScore.value = {}
+}
+
+const viewStudentScorestudent = (student) => {
+  const worksheet = worksheets.value.find(worksheet => worksheet.worksheet_id === expandedWorksheet.value.worksheet_id)
+  const responses = expandedWorksheet.value.responses.filter(row => row.student_id !== student.student_id)
+
+  const questions = []
+  worksheet.questions.map(question => {
+    const selectedWord = responses.find(q => q.question_id === question.question_id)?.selected_word
+    
+    questions.push({
+      ...question,
+      selectedWord,
+      isCorrect: question.correct_word === selectedWord
+    })
+  })
+
+  studentScore.value = {
+    worksheet_id: worksheet.worksheet_id,
+    title: worksheet.title,
+    description: worksheet.description,
+    questions,
+    responses: { ...responses }
+  }
+
+  showStudentScoreModal.value = true
+  
+}
+
+const studentScores = computed(() => {
+  if (!expandedWorksheet.value) return []
+
+  const scores = {}
+
+  expandedWorksheet.value.responses.forEach(response => {
+    const studentId = response.student.student_id
+
+    if (!scores[studentId]) {
+      scores[studentId] = {
+        student: response.student,
+        correctAnswers: 0,
+        totalQuestions: expandedWorksheet.value.questions.length
+      }
+    }
+
+    if (response.selected_word === response.question.correct_word) {
+      scores[studentId].correctAnswers++
+    }
+  })
+
+  return Object.values(scores)
+})
+
+const toggleWorksheet = (worksheet) => {
+  expandedWorksheet.value =
+  expandedWorksheet.value !== null && expandedWorksheet.value.worksheet_id === worksheet.worksheet_id ? null : worksheet
 }
 
 const openCreateModal = () => {
@@ -227,6 +306,7 @@ onMounted(fetchWorksheets)
     <div class="flex justify-end mb-4">
       <Button
         v-if="authStore.isTeacher"
+        :is-disabled="expandedWorksheet !== null"
         @handleClick="openCreateModal()"
       >
         + Nueva ficha de trabajo
@@ -258,7 +338,12 @@ onMounted(fetchWorksheets)
         </tr>
       </tbody>
       <tbody v-if="!isLoading">
-        <tr v-for="worksheet in worksheets" :key="worksheet.worksheet_id">
+        <tr
+          v-for="worksheet in worksheets"
+          :key="worksheet.worksheet_id"
+          class="cursor-pointer hover:bg-gray-100"
+          v-if="expandedWorksheet === null"
+          >
           <td class="px-4 py-2 border-b">{{ worksheet.title }}</td>
           <td class="px-4 py-2 text-center border-b" v-if="authStore.isStudent">
             {{ worksheet.responses.length }} / {{ worksheet.questions.length }}
@@ -288,6 +373,14 @@ onMounted(fetchWorksheets)
               >
                 Ver
               </Button>
+              <Button
+                v-if="authStore.isTeacher && worksheet.responses.length"
+                @handleClick="toggleWorksheet(worksheet)"
+                type="success"
+                size="sm"
+              >
+                Respuestas
+              </Button>
 
               <Button
               v-if="authStore.isStudent"
@@ -299,10 +392,44 @@ onMounted(fetchWorksheets)
             </div>
           </td>
         </tr>
+        <tr v-if="expandedWorksheet !== null">
+          <td colspan="3" class="p-4 border-b bg-gray-50">
+            <header class="flex items-center justify-between">
+              <h3 class="text-lg font-semibold">Respuestas de los alumnos a {{ expandedWorksheet.title }}</h3>
+              <Button
+                @handleClick="hideResponsesTable"
+                type="default"
+                size="sm"
+              >
+                Volver al listado
+              </Button>
+            </header>
+            <table class="w-full mt-2 border border-gray-200 rounded-lg">
+              <thead>
+                <tr class="bg-gray-200">
+                  <th class="px-4 py-2 text-left border-b">Alumno</th>
+                  <th class="px-4 py-2 text-center border-b">Respuestas correctas</th>
+                  <th class="px-4 py-2 text-center border-b">Total preguntas</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="student in studentScores"
+                  :key="student.student.student_id"
+                  @click="viewStudentScorestudent(student)"
+                  >
+                  <td class="px-4 py-2 border-b">{{ student.student.name }}</td>
+                  <td class="px-4 py-2 text-center border-b">{{ student.correctAnswers }}</td>
+                  <td class="px-4 py-2 text-center border-b">{{ student.totalQuestions }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
       </tbody>
     </table>
 
-    <div class="flex justify-between mt-4">
+    <div class="flex justify-between mt-4" v-if="expandedWorksheet === null">
       <button
       @click="prevPage"
       :disabled="offset === 0"
@@ -323,127 +450,161 @@ onMounted(fetchWorksheets)
       </button>
     </div>
 
-<div
-  v-if="showModal"
-  class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50"
->
-  <div class="flex flex-col w-full max-w-2xl p-6 bg-white rounded-lg shadow-lg gap-y-4">
-    <h3 class="mb-4 text-xl font-semibold">
-      {{ isViewing ? 'Detalles de la ficha de trabajo' : 'Nueva ficha de trabajo' }}
-    </h3>
-    <div class="mb-4">
-      <label class="block mb-2 text-sm font-bold text-gray-700">Título</label>
-      <input
-        v-model="newWorksheet.title"
-        type="text"
-        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
-      />
-    </div>
-
-    <div class="flex flex-col px-4 mb-4 overflow-y-auto max-h-96 gap-y-4">
-      <div
-        v-for="(question, index) in newWorksheet.questions"
-        :key="question.question_id"
-        class="flex flex-col pb-4 mb-4 border-b border-gray-300 border-solid gap-y-2">
-        <label class="block mb-2 text-sm font-bold text-gray-700">Pregunta {{  index + 1 }}</label>
-        <input
-          v-model="question.question"
-          type="text"
-          class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
-        />
-
-        <button
-          @click="removeQuestion(index)"
-          class="w-auto px-3 py-1 ml-auto text-sm text-white bg-red-500 rounded-lg hover:bg-red-600 justify-items-end"
-          >Eliminar pregunta</button>
-      
-        <label class="block mb-2 text-sm font-bold text-gray-700">Palabras</label>
-        <div
-          v-for="(word, index) in question.words"
-          :key="index"
-          class="flex items-center gap-2 mb-2"
-        >
+    <div
+      v-if="showModal"
+      class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50"
+    >
+      <div class="flex flex-col w-full max-w-2xl p-6 bg-white rounded-lg shadow-lg gap-y-4">
+        <h3 class="mb-4 text-xl font-semibold">
+          {{ isViewing ? 'Detalles de la ficha de trabajo' : 'Nueva ficha de trabajo' }}
+        </h3>
+        <div class="mb-4">
+          <label class="block mb-2 text-sm font-bold text-gray-700">Título</label>
           <input
-            v-model="question.words[index]"
+            v-model="newWorksheet.title"
             type="text"
-            class="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
-            placeholder="Escribe una palabra"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
           />
-          <input type="radio"
-              v-model="question.correct_word"
-              :checked="question.correct_word === question.words[index]"
-              :value="question.words[index]"
-              class="w-4 h-4 text-primary"
+        </div>
+
+        <div class="flex flex-col px-4 mb-4 overflow-y-auto max-h-96 gap-y-4">
+          <div
+            v-for="(question, index) in newWorksheet.questions"
+            :key="question.question_id"
+            class="flex flex-col pb-4 mb-4 border-b border-gray-300 border-solid gap-y-2">
+            <label class="block mb-2 text-sm font-bold text-gray-700">Pregunta {{  index + 1 }}</label>
+            <input
+              v-model="question.question"
+              type="text"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
             />
-          <button
-            v-if="question.words.length > 1"
-            @click="removeWord(question, index)"
-            class="px-2 py-2 text-white rounded bg-rose-500 hover:bg-rose-600"
-          >
-            <IconClose :size="16" />
-          </button>
-        </div>
-        <button
-          @click="addWord(question)"
-          class="w-auto px-3 py-1 ml-auto text-sm text-white rounded-lg bg-emerald-500 hover:bg-emerald-600 justify-items-end"
-        >
-          + Añadir palabra
-        </button>
-      </div>
-      <button
-        @click="addQuestion(newWorksheet)"
-        class="w-auto px-3 py-1 ml-auto text-sm text-white rounded-lg bg-emerald-500 hover:bg-emerald-600 justify-items-end"
-      >
-        + Añadir pregunta
-      </button>
-    </div>
 
-    <div class="flex justify-end gap-x-2">
-      <Button @handleClick="showModal = false" type="default">Cancelar</Button>
-      <Button @handleClick="saveWorksheet">Guardar</Button>
-    </div>
-  </div>
-</div>
-
-<div
-  v-if="showSubmitModal"
-  class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50"
->
-  <div class="flex flex-col w-full max-w-lg p-6 bg-white rounded-lg shadow-lg gap-y-4">
-    <h3 class="mb-4 text-xl font-semibold">
-      {{ newWorksheet.title }}
-    </h3>
-    <p>{{ newWorksheet.description }}</p>
-
-    <section class="flex flex-col gap-y-4">
-      <article
-        class="pb-4 border-b border-gray-200 border-solid " 
-        v-for="question in newWorksheet.questions"
-        :key="question.question_id"
-        >
-        <h3>{{ question.question }}</h3>
-        <div
-          class="grid grid-cols-2 gap-4 md:grid-cols-3">
-          <button
-            v-for="word in question.words"
-            :key="word"
-            @click="addSelectedWord(question, word)"
-            class="flex items-center justify-center p-4 text-sm transition-all duration-300 bg-gray-100 border-2 border-transparent border-solid rounded-lg hover:border-primary"
-            :class="{ 'bg-primary text-white': selectedWord[question.question_id] === word }"
+            <button
+              @click="removeQuestion(index)"
+              class="w-auto px-3 py-1 ml-auto text-sm text-white bg-red-500 rounded-lg hover:bg-red-600 justify-items-end"
+              >Eliminar pregunta</button>
+          
+            <label class="block mb-2 text-sm font-bold text-gray-700">Palabras</label>
+            <div
+              v-for="(word, index) in question.words"
+              :key="index"
+              class="flex items-center gap-2 mb-2"
             >
-              {{ word }}
+              <input
+                v-model="question.words[index]"
+                type="text"
+                class="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                placeholder="Escribe una palabra"
+              />
+              <input type="radio"
+                  v-model="question.correct_word"
+                  :checked="question.correct_word === question.words[index]"
+                  :value="question.words[index]"
+                  class="w-4 h-4 text-primary"
+                />
+              <button
+                v-if="question.words.length > 1"
+                @click="removeWord(question, index)"
+                class="px-2 py-2 text-white rounded bg-rose-500 hover:bg-rose-600"
+              >
+                <IconClose :size="16" />
+              </button>
+            </div>
+            <button
+              @click="addWord(question)"
+              class="w-auto px-3 py-1 ml-auto text-sm text-white rounded-lg bg-emerald-500 hover:bg-emerald-600 justify-items-end"
+            >
+              + Añadir palabra
+            </button>
+          </div>
+          <button
+            @click="addQuestion(newWorksheet)"
+            class="w-auto px-3 py-1 ml-auto text-sm text-white rounded-lg bg-emerald-500 hover:bg-emerald-600 justify-items-end"
+          >
+            + Añadir pregunta
           </button>
         </div>
-      </article>
-    </section>
 
-    
-
-    <div class="flex justify-end gap-x-2">
-      <Button @handleClick="showSubmitModal = false" type="default">Cancelar</Button>
-      <Button @handleClick="handleSubmitResponse">Enviar</Button>
+        <p class="text-red-500" v-if="errorMessageForm">{{ errorMessageForm }}</p>
+        <div class="flex justify-end gap-x-2">
+          <Button @handleClick="hideShowModal()" type="default">Cancelar</Button>
+          <Button @handleClick="saveWorksheet">Guardar</Button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
+
+    <div
+      v-if="showSubmitModal"
+      class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50"
+    >
+      <div class="flex flex-col w-full max-w-lg p-6 bg-white rounded-lg shadow-lg gap-y-4">
+        <h3 class="mb-4 text-xl font-semibold">
+          {{ newWorksheet.title }}
+        </h3>
+        <p>{{ newWorksheet.description }}</p>
+
+        <section class="flex flex-col gap-y-4">
+          <article
+            class="pb-4 border-b border-gray-200 border-solid " 
+            v-for="question in newWorksheet.questions"
+            :key="question.question_id"
+            >
+            <h3>{{ question.question }}</h3>
+            <div
+              class="grid grid-cols-2 gap-4 md:grid-cols-3">
+              <button
+                v-for="word in question.words"
+                :key="word"
+                @click="addSelectedWord(question, word)"
+                class="flex items-center justify-center p-4 text-sm transition-all duration-300 bg-gray-100 border-2 border-transparent border-solid rounded-lg hover:border-primary"
+                :class="{ 'bg-primary text-white': selectedWord[question.question_id] === word }"
+                >
+                  {{ word }}
+              </button>
+            </div>
+          </article>
+        </section>
+        <div class="flex justify-end gap-x-2">
+          <Button @handleClick="showSubmitModal = false" type="default">Cancelar</Button>
+          <Button @handleClick="handleSubmitResponse">Enviar</Button>
+        </div>
+      </div>
+    </div>
+    <div
+      v-if="showStudentScoreModal"
+      class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50"
+    >
+      <div class="flex flex-col w-full max-w-lg p-6 bg-white rounded-lg shadow-lg gap-y-4">
+        <h3 class="mb-4 text-xl font-semibold">
+          {{ studentScore.title }}
+        </h3>
+        <p>{{ studentScore.description }}</p>
+
+        <section class="flex flex-col gap-y-4">
+          <article
+            class="pb-4 border-b border-gray-200 border-solid " 
+            v-for="question in studentScore.questions"
+            :key="question.question_id"
+            >
+            <h3>{{ question.question }}</h3>
+            <div
+              class="grid grid-cols-2 gap-4 md:grid-cols-3">
+              <button
+                v-for="word in question.words"
+                :key="word"
+                class="flex items-center justify-center p-4 text-sm transition-all duration-300 bg-gray-100 border-2 border-transparent border-solid rounded-lg"
+                :class="{ 'bg-teal-600 text-white': question.selectedWord === word && question.isCorrect, 'bg-rose-500 text-white': question.selectedWord === word && !question.isCorrect}"
+                >
+                  {{  question.selectedWord }}
+                  {{ word }}
+              </button>
+            </div>
+          </article>
+        </section>
+        <div class="flex justify-end gap-x-2">
+          <Button @handleClick="hideStudentScoreModal" type="default">Salir</Button>
+        </div>
+      </div>
+    </div>
   </MainLayout>
 </template>
