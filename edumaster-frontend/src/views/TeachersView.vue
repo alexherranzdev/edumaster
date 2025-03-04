@@ -21,7 +21,7 @@ const fetchTeachers = async () => {
     const response = await api.get('/users?role=teacher')
     teachers.value = response.data
   } catch (error) {
-    errorMessage.value = 'Failed to load teachers'
+    errorMessage.value = 'Error al cargar alumnos'
   } finally {
     isLoading.value = false
   }
@@ -113,7 +113,7 @@ onMounted(fetchTeachers)
       </button>
     </div>
 
-    <div v-if="isLoading" class="text-center text-gray-500">Loading teachers...</div>
+    <div v-if="isLoading" class="text-center text-gray-500">Cargando profesores...</div>
     <div v-else-if="errorMessage" class="text-red-500">{{ errorMessage }}</div>
     <table v-else class="min-w-full bg-white border border-gray-200 rounded-lg shadow-md">
       <thead>
