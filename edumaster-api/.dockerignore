@@ -1,0 +1,29 @@
+# Ignorar dependencias locales
+node_modules
+vendor
+
+# Ignorar archivos de configuración del entorno local
+.env
+.env.local
+.env.testing
+.env.production
+
+# Ignorar archivos de caché de Laravel
+bootstrap/cache/*
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+
+# Ignorar archivos del sistema operativo y de IDEs
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Ignorar archivos innecesarios
+npm-debug.log
+yarn-error.log
+public/hot
+public/storage
+public/vendor
