@@ -29,9 +29,7 @@ const login = async () => {
 </script>
 
 <template>
-  <!-- component -->
   <div class="flex items-center justify-center h-screen text-gray-800 bg-white">
-    <!-- Left: Image -->
     <div class="hidden w-2/3 h-screen lg:block">
       <img
         src="https://habitacion.com/wp-content/uploads/2023/05/bedroom-2-1536x1097.jpg"
@@ -42,7 +40,7 @@ const login = async () => {
     <div class="w-full p-8 lg:p-21 md:p-52 sm:20 lg:w-1/3">
       <form action="#" method="POST" class="flex flex-col gap-y-2.5">
         <div>
-          <label for="username" class="block text-gray-600">Username</label>
+          <label for="username" class="block text-gray-600">Usuario</label>
           <input
             placeholder="Escribe tu correo"
             v-model="email"
@@ -54,7 +52,7 @@ const login = async () => {
           />
         </div>
         <div>
-          <label for="password" class="block text-gray-800">Password</label>
+          <label for="password" class="block text-gray-800">Contraseña</label>
           <input
             placeholder="*************"
             v-model="password"

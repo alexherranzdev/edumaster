@@ -6,6 +6,7 @@ import api from '../services/api'
 import { useAuthStore } from '../stores/auth'
 import MainLayout from '../layouts/MainLayout.vue'
 import IconClose from '@/components/icons/IconClose.vue'
+import Button from '@/components/Button.vue'
 
 const authStore = useAuthStore()
 const route = useRoute()
@@ -217,13 +218,12 @@ onMounted(fetchWorksheets)
 <template>
   <MainLayout title="Fichas de trabajo" activeMenu="worksheets">
     <div class="flex justify-end mb-4">
-      <button
+      <Button
         v-if="authStore.isTeacher"
         @click="openCreateModal()"
-        class="px-4 py-2 text-white transition rounded-lg cursor-pointer bg-primary hover:bg-primary-dark"
       >
         + Nueva ficha de trabajo
-      </button>
+      </Button>
     </div>
 
     <div v-if="errorMessage" class="text-red-500">{{ errorMessage }}</div>
@@ -266,28 +266,29 @@ onMounted(fetchWorksheets)
           </td>
           <td class="px-4 py-2 text-right border-b">
             <div class="flex gap-x-2.5 justify-end">
-              <button
+              <Button
                 v-if="authStore.isTeacher"
                 @click="handleDelete(worksheet)"
-                class="px-3 py-1 text-sm text-white bg-red-500 rounded-md hover:bg-red-600"
+                size="sm"
+                type="danger"
               >
                 Eliminar
-              </button>
-              <button
-              v-if="authStore.isTeacher"
+              </Button>
+              <Button
+                v-if="authStore.isTeacher"
                 @click="openViewModal(worksheet)"
-                class="px-3 py-1 text-sm text-white rounded-md bg-primary hover:bg-primary-dark"
+                size="sm"
               >
                 Ver
-              </button>
+              </Button>
 
-              <button
+              <Button
               v-if="authStore.isStudent"
                 @click="openSubmitModal(worksheet)"
-                class="px-3 py-1 text-sm text-white rounded-md bg-primary hover:bg-primary-dark"
+                size="sm"
               >
                 Ver
-              </button>
+              </Button>
             </div>
           </td>
         </tr>

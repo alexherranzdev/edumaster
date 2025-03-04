@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import api from '../services/api'
 import { useAuthStore } from '../stores/auth'
 import MainLayout from '../layouts/MainLayout.vue'
+import Button from '../components/Button.vue'
 
 const authStore = useAuthStore()
 
@@ -104,13 +105,12 @@ onMounted(fetchTeachers)
 <template>
   <MainLayout title="Profesores" activeMenu="teachers">
     <div class="flex justify-end mb-4">
-      <button
+      <Button
         v-if="authStore.isTeacher"
         @click="openCreateModal()"
-        class="px-4 py-2 text-white transition rounded-lg cursor-pointer bg-primary hover:bg-primary-dark"
       >
         + Añadir profesor
-      </button>
+      </Button>
     </div>
 
     <div v-if="isLoading" class="text-center text-gray-500">Cargando profesores...</div>
@@ -129,18 +129,8 @@ onMounted(fetchTeachers)
           <td class="px-4 py-2 border-b">{{ teacher.email }}</td>
           <td class="px-4 py-2 text-right border-b">
             <div class="flex gap-x-2.5 justify-end">
-              <button
-                @click="openViewModal(teacher)"
-                class="px-3 py-1 text-sm text-white rounded-md bg-primary hover:bg-primary-dark"
-              >
-                Ver
-              </button>
-              <button
-                @click="handleDelete(teacher)"
-                class="px-3 py-1 text-sm text-white rounded-md bg-rose-500 hover:bg-rose-600" 
-              >
-                Eliminar
-              </button>
+              <Button @click="openViewModal(teacher)" size="sm">Ver</Button>
+              <Button @click="handleDelete(teacher)" size="sm" type="danger">Eliminar</Button>
             </div>
           </td>
         </tr>
@@ -190,20 +180,14 @@ onMounted(fetchTeachers)
         <div if="errorFormMessage" class="text-red-500">{{ errorFormMessage }}</div>
 
         <div class="flex justify-end gap-x-2">
-          <button
-            @click="showModal = false"
-            class="px-4 py-2 mr-2 text-white transition bg-gray-400 rounded-lg hover:bg-gray-500"
-          >
-            Cancelar
-          </button>
-          <button
+          <Button @click="showModal = false" type="default">Cancelar</Button>
+          <Button
             @click="saveUser"
-            :disabled="isSaving"
-            class="px-4 py-2 text-white transition rounded-lg bg-primary hover:bg-primary-dark"
+            :is-disabled="isSaving"
             :class="{ 'opacity-50 cursor-not-allowed': isSaving }"
           >
             {{ isSaving ? 'Guardando...' : 'Guardar' }}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
