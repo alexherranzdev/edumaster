@@ -1,37 +1,85 @@
-# EduMaster - Documentación de instalación y uso
+# Proyecto EduMaster 🚀
 
-## **Requisitos previos**
+## Descripción
 
-Antes de iniciar la aplicación, asegúrate de tener instalados los siguientes requisitos en tu máquina:
+Este proyecto es una plataforma de gestión de fichas para estudiantes y profesores. Los profesores pueden crear fichas de trabajo con preguntas y respuestas, y los estudiantes pueden responderlas.
 
-- **Docker** y **Docker Compose**
-- **Make** (opcional, pero recomendado para simplificar comandos)
-- **Node.js** y **npm** (para desarrollo frontend)
+## Instalación
 
----
+### Requisitos previos
 
-## **Instalación y puesta en marcha**
+- Docker
 
-Para iniciar la aplicación, ejecuta los siguientes comandos:
+- Docker Compose
+
+- Make
+
+### Pasos
+
+1. Clonar el repositorio:
 
 ```bash
+
+git clone https://github.com/alexherranzdev/edumaster.git
+
+cd edumaster
+
+```
+
+2. Construir y ejecutar los contenedores:
+
+```bash
+
 make start
+
 ```
 
-Este comando:
+3. Acceder a la aplicación:
 
-- 1. Levanta los contenedores con docker-compose up --build -d.
-- 2. Instala las dependencias del frontend (npm install).
-- 3. Construye la aplicación frontend (npm run build).
+- Frontend: [http://localhost:5173](http://localhost:5173)
 
-Si solo necesitas iniciar el frontend en modo desarrollo:
+- API: [http://localhost:8000](http://localhost:8000)
 
-```bash
-make frontend
+## Usuarios por defecto
+
+Durante la inicialización del proyecto, se crean dos usuarios por defecto:
+
+- **Profesor**
+
+- Usuario: `teacher@edumaster.dev`
+
+- Contraseña: `password`
+
+- **Alumno**
+
+- Usuario: `student@edumaster.dev`
+
+- Contraseña: `password`
+
+## Comandos útiles
+
+- **Iniciar el proyecto**: `make start`
+
+- **Detener los contenedores**: `make stop`
+
+- **Ver logs de la API**: `docker logs -f edumaster-api`
+
+- **Ver logs del frontend**: `docker logs -f edumaster-frontend`
+
+## Estructura del proyecto
+
 ```
 
-Para detener la aplicación:
+edumaster/
 
-```bash
-make stop
+├── edumaster-api/ # Backend en Laravel
+
+├── edumaster-frontend/ # Frontend en Vue.js
+
+├── docker-compose.yml # Configuración de Docker
+
+├── Makefile # Scripts de automatización
+
+└── README.md # Documentación
+
 ```
