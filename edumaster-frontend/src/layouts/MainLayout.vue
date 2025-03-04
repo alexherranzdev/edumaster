@@ -27,10 +27,10 @@ defineProps({
           <img
             class="size-8"
             src="https://tailwindui.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
-            alt="Edumaster Logo"
+            alt="EduMaster Logo"
             
           />
-          <h1 class="text-lg font-semibold text-gray-800">Edumaster</h1>
+          <h1 class="text-lg font-semibold text-gray-800">EduMaster</h1>
         </div>
 
         <Navigation :active-menu="activeMenu" />
