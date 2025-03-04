@@ -49,7 +49,7 @@ class WorksheetSeeder extends Seeder
             DB::table('worksheets')->insert([
                 'worksheet_id' => $worksheetId,
                 'teacher_id' => $teacherId,
-                'title' => "Worksheet #$i",
+                'title' => "Worksheet $i",
                 'description' => "Preguntas sobre Laravel, Vue y programación.",
                 'created_at' => $now,
                 'updated_at' => $now,

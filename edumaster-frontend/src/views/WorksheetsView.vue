@@ -12,6 +12,10 @@ const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 
+let abortController = new AbortController()
+let debounceTimer = null
+
+const search = ref([])
 const worksheets = ref([])
 const isLoading = ref(true)
 const errorMessage = ref(null)
@@ -70,7 +74,14 @@ const removeWord = (question, index) => {
 const fetchWorksheets = async () => {
   isLoading.value = true
   try {
+    abortController.abort()
+    abortController = new AbortController()
+
     let url = `/worksheets?limit=${limit}&offset=${offset.value}`
+
+    if (search.value) {
+      url += `&search=${search.value}`
+    }
 
     if (authStore.isStudent) {
       url += `&with=responses`
@@ -78,19 +89,30 @@ const fetchWorksheets = async () => {
       url += `&with=responses.student,responses.question`
     }
 
-    const response = await api.get(url)
+    const response = await api.get(url, { signal: abortController.signal })
     worksheets.value = response.data.data
     hasMore.value = response.data.hasMore
+    errorMessage.value = null
   } catch (error) {
+    if (error.name === 'AbortError') return
     if (error.status === 401) {
       authStore.logout()
       window.location.reload()
     }
-    errorMessage.value = 'Error al cargar las worksheets'
+    // errorMessage.value = 'Error al cargar las fichas de trabajo'
+    worksheets.value = []
+    hasMore.value = false
   } finally {
     isLoading.value = false
   }
 }
+
+watch(search, (newSearch) => {
+  clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    fetchWorksheets()
+  }, 500)
+})
 
 const updatePage = (newOffset) => {
   offset.value = newOffset
@@ -242,7 +264,7 @@ const openSubmitModal = (worksheet) => {
     }))
   }
 
-  if (worksheet.responses.length > 0) {
+  if (worksheet.responses?.length > 0) {
     worksheet.responses.map(response => {
       selectedWord.value[response.question_id] = response.selected_word
     })
@@ -303,7 +325,7 @@ onMounted(fetchWorksheets)
 
 <template>
   <MainLayout title="Fichas de trabajo" activeMenu="worksheets">
-    <div class="flex justify-end mb-4">
+    <header class="flex justify-end mb-4"> 
       <Button
         v-if="authStore.isTeacher"
         :is-disabled="expandedWorksheet !== null"
@@ -311,8 +333,13 @@ onMounted(fetchWorksheets)
       >
         + Nueva ficha de trabajo
       </Button>
-    </div>
+    </header>
 
+    <input
+      type="text"
+      v-model="search"
+      placeholder="Buscar por título"
+      class="w-full px-4 py-2 transition-all duration-300 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:bg-white hover:border-gray-700" />
     <div v-if="errorMessage" class="text-red-500">{{ errorMessage }}</div>
     <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow-md">
       <thead>
@@ -374,7 +401,7 @@ onMounted(fetchWorksheets)
                 Ver
               </Button>
               <Button
-                v-if="authStore.isTeacher && worksheet.responses.length"
+                v-if="authStore.isTeacher && worksheet.responses?.length"
                 @handleClick="toggleWorksheet(worksheet)"
                 type="success"
                 size="sm"

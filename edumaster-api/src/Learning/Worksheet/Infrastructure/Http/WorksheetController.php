@@ -66,12 +66,22 @@ class WorksheetController
       $with = explode(',', $request->query('with'));
     }
 
+    $filters = [];
+    if ($request->has('search')) {
+      $filters[] = [
+        'field' => 'title',
+        'operator' => 'like',
+        'value' => '%' . $request->query('search') . '%'
+      ];
+    }
+
     $worksheets = $this->listWorksheetsService->execute(
       $request->user()->user_id->value(),
       $request->user()->role,
       (int)$request->query('limit', 10),
       (int)$request->query('offset', 0),
-      $with
+      $with,
+      $filters
     );
 
     return response()->json($worksheets);

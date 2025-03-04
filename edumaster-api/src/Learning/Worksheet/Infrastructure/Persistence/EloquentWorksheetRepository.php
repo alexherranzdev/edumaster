@@ -36,12 +36,17 @@ class EloquentWorksheetRepository implements WorksheetRepository
     return $worksheet;
   }
 
-  public function findAll(UserId $userId, int $limit = 100, int $offset = 0, array $with = []): array
+  public function findAll(UserId $userId, int $limit = 100, int $offset = 0, array $with = [], array $filters = []): array
   {
     $with = array_merge(['questions'], $with);
 
-    $worksheets = Worksheet::with($with)
-      ->limit($limit + 1)
+    $worksheets = Worksheet::with($with);
+
+    foreach ($filters as $filter) {
+      $worksheets->where('title', $filter['operator'], $filter['value']);
+    }
+
+    $worksheets = $worksheets->limit($limit + 1)
       ->offset($offset)
       ->get();
 
@@ -53,7 +58,7 @@ class EloquentWorksheetRepository implements WorksheetRepository
     ];
   }
 
-  public function findAllByStudent(UserId $studentId, int $limit = 100, int $offset = 0, array $with = []): array
+  public function findAllByStudent(UserId $studentId, int $limit = 100, int $offset = 0, array $with = [], array $filters = []): array
   {
     $with = array_merge(['questions'], $with);
 
@@ -68,8 +73,13 @@ class EloquentWorksheetRepository implements WorksheetRepository
       }
     }
 
-    $worksheets = Worksheet::with($withRelations)
-      ->limit($limit + 1)
+    $worksheets = Worksheet::with($withRelations);
+
+    foreach ($filters as $filter) {
+      $worksheets->where($filter['field'], $filter['operator'], $filter['value']);
+    }
+
+    $worksheets->limit($limit + 1)
       ->offset($offset)
       ->get();
 

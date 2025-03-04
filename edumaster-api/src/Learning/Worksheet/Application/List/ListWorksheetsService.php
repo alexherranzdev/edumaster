@@ -16,12 +16,13 @@ class ListWorksheetsService
     string $role,
     int $limit = 100,
     int $offset = 0,
-    array $with = []
+    array $with = [],
+    array $filters = []
   ): array {
     if ($role === 'teacher') {
-      return $this->repository->findAll(new UserId($userId), $limit, $offset, $with);
+      return $this->repository->findAll(new UserId($userId), $limit, $offset, $with, $filters);
     }
 
-    return $this->repository->findAllByStudent(new UserId($userId), $limit, $offset, $with);
+    return $this->repository->findAllByStudent(new UserId($userId), $limit, $offset, $with, $filters);
   }
 }
