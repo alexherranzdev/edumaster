@@ -38,7 +38,7 @@ defineProps({
         <!-- Profile Menu -->
         <div class="flex items-center gap-4">
           <button class="text-gray-500 cursor-pointer hover:text-gray-700" @click="logout">
-            <Logout :size="24" color="#666" />
+            <Logout size="24" color="#666" />
           </button>
           <div class="relative">
             <button class="flex items-center space-x-2 focus:outline-none">

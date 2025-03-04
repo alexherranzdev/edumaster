@@ -107,7 +107,7 @@ onMounted(fetchTeachers)
     <div class="flex justify-end mb-4">
       <Button
         v-if="authStore.isTeacher"
-        @click="openCreateModal()"
+        @handleClick="openCreateModal()"
       >
         + Añadir profesor
       </Button>
@@ -129,8 +129,8 @@ onMounted(fetchTeachers)
           <td class="px-4 py-2 border-b">{{ teacher.email }}</td>
           <td class="px-4 py-2 text-right border-b">
             <div class="flex gap-x-2.5 justify-end">
-              <Button @click="openViewModal(teacher)" size="sm">Ver</Button>
-              <Button @click="handleDelete(teacher)" size="sm" type="danger">Eliminar</Button>
+              <Button @handleClick="openViewModal(teacher)" size="sm">Ver</Button>
+              <Button @handleClick="handleDelete(teacher)" size="sm" type="danger">Eliminar</Button>
             </div>
           </td>
         </tr>
@@ -180,9 +180,9 @@ onMounted(fetchTeachers)
         <div if="errorFormMessage" class="text-red-500">{{ errorFormMessage }}</div>
 
         <div class="flex justify-end gap-x-2">
-          <Button @click="showModal = false" type="default">Cancelar</Button>
+          <Button @handleClick="showModal = false" type="default">Cancelar</Button>
           <Button
-            @click="saveUser"
+            @handleClick="saveUser"
             :is-disabled="isSaving"
             :class="{ 'opacity-50 cursor-not-allowed': isSaving }"
           >

@@ -154,12 +154,19 @@ const shuffleArray = (array) => {
 
 const openSubmitModal = (worksheet) => {
   isSubmit.value = true
+  
   newWorksheet.value = {
     ...worksheet,
     questions: worksheet.questions.map(question => ({
       ...question,
       words: shuffleArray([...question.words])
     }))
+  }
+
+  if (worksheet.responses.length > 0) {
+    worksheet.responses.map(response => {
+      selectedWord.value[response.question_id] = response.selected_word
+    })
   }
   
   showSubmitModal.value = true
@@ -220,7 +227,7 @@ onMounted(fetchWorksheets)
     <div class="flex justify-end mb-4">
       <Button
         v-if="authStore.isTeacher"
-        @click="openCreateModal()"
+        @handleClick="openCreateModal()"
       >
         + Nueva ficha de trabajo
       </Button>
@@ -268,7 +275,7 @@ onMounted(fetchWorksheets)
             <div class="flex gap-x-2.5 justify-end">
               <Button
                 v-if="authStore.isTeacher"
-                @click="handleDelete(worksheet)"
+                @handleClick="handleDelete(worksheet)"
                 size="sm"
                 type="danger"
               >
@@ -276,7 +283,7 @@ onMounted(fetchWorksheets)
               </Button>
               <Button
                 v-if="authStore.isTeacher"
-                @click="openViewModal(worksheet)"
+                @handleClick="openViewModal(worksheet)"
                 size="sm"
               >
                 Ver
@@ -284,7 +291,7 @@ onMounted(fetchWorksheets)
 
               <Button
               v-if="authStore.isStudent"
-                @click="openSubmitModal(worksheet)"
+                @handleClick="openSubmitModal(worksheet)"
                 size="sm"
               >
                 Ver
@@ -300,7 +307,7 @@ onMounted(fetchWorksheets)
       @click="prevPage"
       :disabled="offset === 0"
       class="px-3 py-1 text-white bg-gray-600 rounded-md"
-      :class="{ 'opacity-50 cursor-not-allowed': offset === 0 }">
+      :class="{ 'opacity-50 cursor-not-allowed': offset === 0, 'cursor-pointer': offset !== 0 }">
         Anterior
       </button>
 
@@ -310,7 +317,7 @@ onMounted(fetchWorksheets)
         @click="nextPage"
         :disabled="!hasMore"
         class="px-3 py-1 text-white bg-gray-600 rounded-md"
-        :class="{ 'opacity-50 cursor-not-allowed': !hasMore }"
+        :class="{ 'opacity-50 cursor-not-allowed': !hasMore, 'cursor-pointer': hasMore }"
       >
         Siguiente
       </button>
@@ -392,8 +399,8 @@ onMounted(fetchWorksheets)
     </div>
 
     <div class="flex justify-end gap-x-2">
-      <Button @click="showModal = false" type="default">Cancelar</Button>
-      <Button @click="saveWorksheet">Guardar</Button>
+      <Button @handleClick="showModal = false" type="default">Cancelar</Button>
+      <Button @handleClick="saveWorksheet">Guardar</Button>
     </div>
   </div>
 </div>
@@ -433,8 +440,8 @@ onMounted(fetchWorksheets)
     
 
     <div class="flex justify-end gap-x-2">
-      <Button @click="showSubmitModal = false" type="default">Cancelar</Button>
-      <Button @click="handleSubmitResponse">Enviar</Button>
+      <Button @handleClick="showSubmitModal = false" type="default">Cancelar</Button>
+      <Button @handleClick="handleSubmitResponse">Enviar</Button>
     </div>
   </div>
 </div>

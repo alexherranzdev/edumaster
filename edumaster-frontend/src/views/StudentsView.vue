@@ -135,7 +135,7 @@ onMounted(fetchStudents)
     <div class="flex justify-end mb-4">
       <Button
         v-if="authStore.isTeacher"
-        @click="openCreateModal()"
+        @handleClick="openCreateModal()"
       >
         + Añadir alumno
       </Button>
@@ -159,14 +159,14 @@ onMounted(fetchStudents)
             <div class="flex gap-x-2.5 justify-end">
               <Button
                 v-if="authStore.isTeacher"
-                @click="openViewModal(student)"
+                @handleClick="openViewModal(student)"
                 size="sm"
               >
                 Ver
               </Button>
               <Button
                 v-if="authStore.isTeacher"
-                @click="handleDelete(student)"
+                @handleClick="handleDelete(student)"
                 size="sm"
                 type="danger"
               >
@@ -226,13 +226,13 @@ onMounted(fetchStudents)
 
         <div class="flex justify-end gap-x-2">
           <Button
-            @click="closeModal"
+            @handleClick="closeModal"
             type="default"
           >
             Cancelar
           </Button>
           <Button
-            @click="saveUser"
+            @handleClick="saveUser"
             :is-disabled="isSaving"
             :class="{ 'opacity-50 cursor-not-allowed': isSaving }"
           >

@@ -40,7 +40,7 @@ const computedClasses = computed(() => {
 <template>
   <button
     :disabled="isDisabled"
-    @click="$emit('click')"
+    @click="$emit('handleClick')"
     :class="computedClasses">
     <slot />
   </button>
