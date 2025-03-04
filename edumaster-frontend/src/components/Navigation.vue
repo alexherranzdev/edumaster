@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, ref } from 'vue'
+import { ref } from 'vue'
 import { useAuthStore } from '../stores/auth'
 
 const authStore = useAuthStore()
