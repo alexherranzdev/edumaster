@@ -3,8 +3,8 @@ import { defineProps } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import { useRouter } from 'vue-router'
 
-import Navigation from '../components/Navigation.vue'
-import Logout from '../components/icons/Logout.vue'
+import MainNavigation from '../components/MainNavigation.vue'
+import IconLogout from '../components/icons/IconLogout.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -28,17 +28,16 @@ defineProps({
             class="size-8"
             src="https://tailwindui.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
             alt="EduMaster Logo"
-            
           />
           <h1 class="text-lg font-semibold text-gray-800">EduMaster</h1>
         </div>
 
-        <Navigation :active-menu="activeMenu" />
+        <MainNavigation :active-menu="activeMenu" />
 
         <!-- Profile Menu -->
         <div class="flex items-center gap-4">
           <button class="text-gray-500 cursor-pointer hover:text-gray-700" @click="logout">
-            <Logout size="24" color="#666" />
+            <IconLogout size="24" color="#666" />
           </button>
           <div class="relative">
             <button class="flex items-center space-x-2 focus:outline-none">

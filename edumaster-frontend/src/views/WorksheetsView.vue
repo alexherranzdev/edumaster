@@ -1,12 +1,12 @@
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { v4 as uuidv4 } from "uuid"
+import { v4 as uuidv4 } from 'uuid'
 import api from '../services/api'
 import { useAuthStore } from '../stores/auth'
 import MainLayout from '../layouts/MainLayout.vue'
 import IconClose from '@/components/icons/IconClose.vue'
-import Button from '@/components/Button.vue'
+import BaseButton from '@/components/BaseButton.vue'
 
 const authStore = useAuthStore()
 const route = useRoute()
@@ -31,7 +31,7 @@ const newWorksheet = ref({
   title: '',
   description: '',
   questions: [],
-  correct_word: ''
+  correct_word: '',
 })
 const studentScore = ref({})
 const limit = 10
@@ -48,12 +48,12 @@ const addQuestion = (worksheet) => {
   if (!worksheet.questions) {
     worksheet.questions = []
   }
-  
+
   worksheet.questions.push({
     question_id: uuidv4(),
     question: '',
     words: [],
-    correct_word: ''
+    correct_word: '',
   })
 }
 
@@ -107,7 +107,7 @@ const fetchWorksheets = async () => {
   }
 }
 
-watch(search, (newSearch) => {
+watch(search, () => {
   clearTimeout(debounceTimer)
   debounceTimer = setTimeout(() => {
     fetchWorksheets()
@@ -179,17 +179,23 @@ const hideStudentScoreModal = () => {
 }
 
 const viewStudentScorestudent = (student) => {
-  const worksheet = worksheets.value.find(worksheet => worksheet.worksheet_id === expandedWorksheet.value.worksheet_id)
-  const responses = expandedWorksheet.value.responses.filter(row => row.student_id !== student.student_id)
+  const worksheet = worksheets.value.find(
+    (worksheet) => worksheet.worksheet_id === expandedWorksheet.value.worksheet_id,
+  )
+  const responses = expandedWorksheet.value.responses.filter(
+    (row) => row.student_id !== student.student_id,
+  )
 
   const questions = []
-  worksheet.questions.map(question => {
-    const selectedWord = responses.find(q => q.question_id === question.question_id)?.selected_word
-    
+  worksheet.questions.map((question) => {
+    const selectedWord = responses.find(
+      (q) => q.question_id === question.question_id,
+    )?.selected_word
+
     questions.push({
       ...question,
       selectedWord,
-      isCorrect: question.correct_word === selectedWord
+      isCorrect: question.correct_word === selectedWord,
     })
   })
 
@@ -198,11 +204,10 @@ const viewStudentScorestudent = (student) => {
     title: worksheet.title,
     description: worksheet.description,
     questions,
-    responses: { ...responses }
+    responses: { ...responses },
   }
 
   showStudentScoreModal.value = true
-  
 }
 
 const studentScores = computed(() => {
@@ -210,14 +215,14 @@ const studentScores = computed(() => {
 
   const scores = {}
 
-  expandedWorksheet.value.responses.forEach(response => {
+  expandedWorksheet.value.responses.forEach((response) => {
     const studentId = response.student.student_id
 
     if (!scores[studentId]) {
       scores[studentId] = {
         student: response.student,
         correctAnswers: 0,
-        totalQuestions: expandedWorksheet.value.questions.length
+        totalQuestions: expandedWorksheet.value.questions.length,
       }
     }
 
@@ -231,7 +236,10 @@ const studentScores = computed(() => {
 
 const toggleWorksheet = (worksheet) => {
   expandedWorksheet.value =
-  expandedWorksheet.value !== null && expandedWorksheet.value.worksheet_id === worksheet.worksheet_id ? null : worksheet
+    expandedWorksheet.value !== null &&
+    expandedWorksheet.value.worksheet_id === worksheet.worksheet_id
+      ? null
+      : worksheet
 }
 
 const openCreateModal = () => {
@@ -242,34 +250,34 @@ const openCreateModal = () => {
 
 const openViewModal = (worksheet) => {
   isViewing.value = true
-  newWorksheet.value = {...worksheet}
+  newWorksheet.value = { ...worksheet }
   showModal.value = true
 }
 
 const shuffleArray = (array) => {
   return array
-    .map(value => ({ value, sort: Math.random() }))
+    .map((value) => ({ value, sort: Math.random() }))
     .sort((a, b) => a.sort - b.sort)
     .map(({ value }) => value)
 }
 
 const openSubmitModal = (worksheet) => {
   isSubmit.value = true
-  
+
   newWorksheet.value = {
     ...worksheet,
-    questions: worksheet.questions.map(question => ({
+    questions: worksheet.questions.map((question) => ({
       ...question,
-      words: shuffleArray([...question.words])
-    }))
+      words: shuffleArray([...question.words]),
+    })),
   }
 
   if (worksheet.responses?.length > 0) {
-    worksheet.responses.map(response => {
+    worksheet.responses.map((response) => {
       selectedWord.value[response.question_id] = response.selected_word
     })
   }
-  
+
   showSubmitModal.value = true
 }
 
@@ -300,13 +308,13 @@ const handleSubmitResponse = async () => {
 
 const submitResponse = async () => {
   try {
-    const responses = Object.keys(selectedWord.value).map(question_id => ({
+    const responses = Object.keys(selectedWord.value).map((question_id) => ({
       question_id,
-      selected_word: selectedWord.value[question_id]
+      selected_word: selectedWord.value[question_id],
     }))
-  
+
     await api.post(`/worksheets/${newWorksheet.value.worksheet_id}/submit`, {
-      responses
+      responses,
     })
     showSubmitModal.value = false
     fetchWorksheets()
@@ -315,31 +323,35 @@ const submitResponse = async () => {
   }
 }
 
-watch(() => route.query.page, (newPage) => {
-  offset.value = newPage ? (parseInt(newPage) - 1) * limit : 0
-  fetchWorksheets()
-})
+watch(
+  () => route.query.page,
+  (newPage) => {
+    offset.value = newPage ? (parseInt(newPage) - 1) * limit : 0
+    fetchWorksheets()
+  },
+)
 
 onMounted(fetchWorksheets)
 </script>
 
 <template>
   <MainLayout title="Fichas de trabajo" activeMenu="worksheets">
-    <header class="flex justify-end mb-4"> 
-      <Button
+    <header class="flex justify-end mb-4">
+      <BaseButton
         v-if="authStore.isTeacher"
         :is-disabled="expandedWorksheet !== null"
         @handleClick="openCreateModal()"
       >
         + Nueva ficha de trabajo
-      </Button>
+      </BaseButton>
     </header>
 
     <input
       type="text"
       v-model="search"
       placeholder="Buscar por título"
-      class="w-full px-4 py-2 transition-all duration-300 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:bg-white hover:border-gray-700" />
+      class="w-full px-4 py-2 transition-all duration-300 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:bg-white hover:border-gray-700"
+    />
     <div v-if="errorMessage" class="text-red-500">{{ errorMessage }}</div>
     <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow-md">
       <thead>
@@ -364,13 +376,12 @@ onMounted(fetchWorksheets)
           <td class="px-4 py-2 border-b"></td>
         </tr>
       </tbody>
-      <tbody v-if="!isLoading">
+      <tbody v-if="!isLoading && expandedWorksheet === null"> 
         <tr
           v-for="worksheet in worksheets"
           :key="worksheet.worksheet_id"
           class="cursor-pointer hover:bg-gray-100"
-          v-if="expandedWorksheet === null"
-          >
+        >
           <td class="px-4 py-2 border-b">{{ worksheet.title }}</td>
           <td class="px-4 py-2 text-center border-b" v-if="authStore.isStudent">
             {{ worksheet.responses.length }} / {{ worksheet.questions.length }}
@@ -379,57 +390,65 @@ onMounted(fetchWorksheets)
             {{ worksheet.questions.length }}
           </td>
           <td class="px-4 py-2 border-b" v-if="authStore.isStudent">
-            <span v-if="worksheet.responses.length === worksheet.questions.length" class="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-green-900 dark:text-green-300">Terminado</span>
-            <span v-else-if="worksheet.responses.length > 0" class="bg-yellow-100 text-yellow-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-orange-800 dark:text-yellow-300">Pendiente</span>
-            <span v-else class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-gray-200 dark:text-gray-900">Sin empezar</span>
+            <span
+              v-if="worksheet.responses.length === worksheet.questions.length"
+              class="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-green-900 dark:text-green-300"
+              >Terminado</span
+            >
+            <span
+              v-else-if="worksheet.responses.length > 0"
+              class="bg-yellow-100 text-yellow-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-orange-800 dark:text-yellow-300"
+              >Pendiente</span
+            >
+            <span
+              v-else
+              class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-gray-200 dark:text-gray-900"
+              >Sin empezar</span
+            >
           </td>
           <td class="px-4 py-2 text-right border-b">
             <div class="flex gap-x-2.5 justify-end">
-              <Button
+              <BaseButton
                 v-if="authStore.isTeacher"
                 @handleClick="handleDelete(worksheet)"
                 size="sm"
                 type="danger"
               >
                 Eliminar
-              </Button>
-              <Button
-                v-if="authStore.isTeacher"
-                @handleClick="openViewModal(worksheet)"
-                size="sm"
-              >
+              </BaseButton>
+              <BaseButton v-if="authStore.isTeacher" @handleClick="openViewModal(worksheet)" size="sm">
                 Ver
-              </Button>
-              <Button
+              </BaseButton>
+              <BaseButton
                 v-if="authStore.isTeacher && worksheet.responses?.length"
                 @handleClick="toggleWorksheet(worksheet)"
                 type="success"
                 size="sm"
               >
                 Respuestas
-              </Button>
+              </BaseButton>
 
-              <Button
-              v-if="authStore.isStudent"
+              <BaseButton
+                v-if="authStore.isStudent"
                 @handleClick="openSubmitModal(worksheet)"
                 size="sm"
               >
                 Ver
-              </Button>
+              </BaseButton>
             </div>
           </td>
         </tr>
-        <tr v-if="expandedWorksheet !== null">
+      </tbody>
+      <tbody v-if="!isLoading && expandedWorksheet !== null"> 
+        <tr>
           <td colspan="3" class="p-4 border-b bg-gray-50">
             <header class="flex items-center justify-between">
-              <h3 class="text-lg font-semibold">Respuestas de los alumnos a {{ expandedWorksheet.title }}</h3>
-              <Button
-                @handleClick="hideResponsesTable"
-                type="default"
-                size="sm"
-              >
+              <h3 class="text-lg font-semibold">
+                Respuestas de los alumnos a {{ expandedWorksheet.title }}
+              </h3>
+              <BaseButton @handleClick="hideResponsesTable" type="default" size="sm">
                 Volver al listado
-              </Button>
+              </BaseButton>
             </header>
             <table class="w-full mt-2 border border-gray-200 rounded-lg">
               <thead>
@@ -444,7 +463,7 @@ onMounted(fetchWorksheets)
                   v-for="student in studentScores"
                   :key="student.student.student_id"
                   @click="viewStudentScorestudent(student)"
-                  >
+                >
                   <td class="px-4 py-2 border-b">{{ student.student.name }}</td>
                   <td class="px-4 py-2 text-center border-b">{{ student.correctAnswers }}</td>
                   <td class="px-4 py-2 text-center border-b">{{ student.totalQuestions }}</td>
@@ -458,10 +477,11 @@ onMounted(fetchWorksheets)
 
     <div class="flex justify-between mt-4" v-if="expandedWorksheet === null">
       <button
-      @click="prevPage"
-      :disabled="offset === 0"
-      class="px-3 py-1 text-white bg-gray-600 rounded-md"
-      :class="{ 'opacity-50 cursor-not-allowed': offset === 0, 'cursor-pointer': offset !== 0 }">
+        @click="prevPage"
+        :disabled="offset === 0"
+        class="px-3 py-1 text-white bg-gray-600 rounded-md"
+        :class="{ 'opacity-50 cursor-not-allowed': offset === 0, 'cursor-pointer': offset !== 0 }"
+      >
         Anterior
       </button>
 
@@ -498,8 +518,11 @@ onMounted(fetchWorksheets)
           <div
             v-for="(question, index) in newWorksheet.questions"
             :key="question.question_id"
-            class="flex flex-col pb-4 mb-4 border-b border-gray-300 border-solid gap-y-2">
-            <label class="block mb-2 text-sm font-bold text-gray-700">Pregunta {{  index + 1 }}</label>
+            class="flex flex-col pb-4 mb-4 border-b border-gray-300 border-solid gap-y-2"
+          >
+            <label class="block mb-2 text-sm font-bold text-gray-700"
+              >Pregunta {{ index + 1 }}</label
+            >
             <input
               v-model="question.question"
               type="text"
@@ -509,8 +532,10 @@ onMounted(fetchWorksheets)
             <button
               @click="removeQuestion(index)"
               class="w-auto px-3 py-1 ml-auto text-sm text-white bg-red-500 rounded-lg hover:bg-red-600 justify-items-end"
-              >Eliminar pregunta</button>
-          
+            >
+              Eliminar pregunta
+            </button>
+
             <label class="block mb-2 text-sm font-bold text-gray-700">Palabras</label>
             <div
               v-for="(word, index) in question.words"
@@ -523,12 +548,13 @@ onMounted(fetchWorksheets)
                 class="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
                 placeholder="Escribe una palabra"
               />
-              <input type="radio"
-                  v-model="question.correct_word"
-                  :checked="question.correct_word === question.words[index]"
-                  :value="question.words[index]"
-                  class="w-4 h-4 text-primary"
-                />
+              <input
+                type="radio"
+                v-model="question.correct_word"
+                :checked="question.correct_word === question.words[index]"
+                :value="question.words[index]"
+                class="w-4 h-4 text-primary"
+              />
               <button
                 v-if="question.words.length > 1"
                 @click="removeWord(question, index)"
@@ -554,8 +580,8 @@ onMounted(fetchWorksheets)
 
         <p class="text-red-500" v-if="errorMessageForm">{{ errorMessageForm }}</p>
         <div class="flex justify-end gap-x-2">
-          <Button @handleClick="hideShowModal()" type="default">Cancelar</Button>
-          <Button @handleClick="saveWorksheet">Guardar</Button>
+          <BaseButton @handleClick="hideShowModal()" type="default">Cancelar</BaseButton>
+          <BaseButton @handleClick="saveWorksheet">Guardar</BaseButton>
         </div>
       </div>
     </div>
@@ -572,28 +598,27 @@ onMounted(fetchWorksheets)
 
         <section class="flex flex-col gap-y-4">
           <article
-            class="pb-4 border-b border-gray-200 border-solid " 
+            class="pb-4 border-b border-gray-200 border-solid"
             v-for="question in newWorksheet.questions"
             :key="question.question_id"
-            >
+          >
             <h3>{{ question.question }}</h3>
-            <div
-              class="grid grid-cols-2 gap-4 md:grid-cols-3">
+            <div class="grid grid-cols-2 gap-4 md:grid-cols-3">
               <button
                 v-for="word in question.words"
                 :key="word"
                 @click="addSelectedWord(question, word)"
                 class="flex items-center justify-center p-4 text-sm transition-all duration-300 bg-gray-100 border-2 border-transparent border-solid rounded-lg hover:border-primary"
                 :class="{ 'bg-primary text-white': selectedWord[question.question_id] === word }"
-                >
-                  {{ word }}
+              >
+                {{ word }}
               </button>
             </div>
           </article>
         </section>
         <div class="flex justify-end gap-x-2">
-          <Button @handleClick="showSubmitModal = false" type="default">Cancelar</Button>
-          <Button @handleClick="handleSubmitResponse">Enviar</Button>
+          <BaseButton @handleClick="showSubmitModal = false" type="default">Cancelar</BaseButton>
+          <BaseButton @handleClick="handleSubmitResponse">Enviar</BaseButton>
         </div>
       </div>
     </div>
@@ -609,27 +634,29 @@ onMounted(fetchWorksheets)
 
         <section class="flex flex-col gap-y-4">
           <article
-            class="pb-4 border-b border-gray-200 border-solid " 
+            class="pb-4 border-b border-gray-200 border-solid"
             v-for="question in studentScore.questions"
             :key="question.question_id"
-            >
+          >
             <h3>{{ question.question }}</h3>
-            <div
-              class="grid grid-cols-2 gap-4 md:grid-cols-3">
+            <div class="grid grid-cols-2 gap-4 md:grid-cols-3">
               <button
                 v-for="word in question.words"
                 :key="word"
                 class="flex items-center justify-center p-4 text-sm transition-all duration-300 bg-gray-100 border-2 border-transparent border-solid rounded-lg"
-                :class="{ 'bg-teal-600 text-white': question.selectedWord === word && question.isCorrect, 'bg-rose-500 text-white': question.selectedWord === word && !question.isCorrect}"
-                >
-                  {{  question.selectedWord }}
-                  {{ word }}
+                :class="{
+                  'bg-teal-600 text-white': question.selectedWord === word && question.isCorrect,
+                  'bg-rose-500 text-white': question.selectedWord === word && !question.isCorrect,
+                }"
+              >
+                {{ question.selectedWord }}
+                {{ word }}
               </button>
             </div>
           </article>
         </section>
         <div class="flex justify-end gap-x-2">
-          <Button @handleClick="hideStudentScoreModal" type="default">Salir</Button>
+          <BaseButton @handleClick="hideStudentScoreModal" type="default">Salir</BaseButton>
         </div>
       </div>
     </div>

@@ -1,10 +1,10 @@
-@import "tailwindcss"; 
+@import 'tailwindcss';
 
 @theme {
-  --color-primary: #004AAD;
-  --color-primary-dark: #003C7E;
-  --color-primary-light: #0053C7;
-  --color-secondary: #F9C34A;
+  --color-primary: #004aad;
+  --color-primary-dark: #003c7e;
+  --color-primary-light: #0053c7;
+  --color-secondary: #f9c34a;
 }
 
 @import './base.css';
@@ -13,5 +13,5 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  font-family: "Raleway", serif;
+  font-family: 'Raleway', serif;
 }

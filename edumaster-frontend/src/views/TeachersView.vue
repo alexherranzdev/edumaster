@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue'
 import api from '../services/api'
 import { useAuthStore } from '../stores/auth'
 import MainLayout from '../layouts/MainLayout.vue'
-import Button from '../components/Button.vue'
+import BaseButton from '../components/BaseButton.vue'
 
 const authStore = useAuthStore()
 
@@ -21,7 +21,7 @@ const fetchTeachers = async () => {
   try {
     const response = await api.get('/users?role=teacher')
     teachers.value = response.data
-  } catch (error) {
+  } catch {
     errorMessage.value = 'Error al cargar alumnos'
   } finally {
     isLoading.value = false
@@ -37,7 +37,7 @@ const openCreateModal = () => {
 const openViewModal = (student) => {
   isViewing.value = true
   errorFormMessage.value = null
-  newUser.value = {...student}
+  newUser.value = { ...student }
   showModal.value = true
 }
 
@@ -67,10 +67,7 @@ const createUser = async (user) => {
 }
 
 const saveUser = async () => {
-  if (
-    typeof newUser.value.user_id !== 'undefined' &&
-    newUser.value.user_id !== null
-  ) {
+  if (typeof newUser.value.user_id !== 'undefined' && newUser.value.user_id !== null) {
     await updateUser(newUser.value)
   } else {
     await createUser(newUser.value)
@@ -85,7 +82,7 @@ const handleDelete = async (student) => {
   if (!confirm('¿Estás seguro de eliminar este profesor?')) {
     return
   }
-  
+
   await deleteStudent(student)
   fetchTeachers()
 }
@@ -93,7 +90,8 @@ const handleDelete = async (student) => {
 const validatePassword = (event) => {
   const password = event.target.value
   if (!password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/)) {
-    errorsForm.password = 'La contraseña debe contener al menos una letra mayúscula, una letra minúscula y un número'
+    errorsForm.password =
+      'La contraseña debe contener al menos una letra mayúscula, una letra minúscula y un número'
   } else {
     delete errorsForm.password
   }
@@ -105,12 +103,9 @@ onMounted(fetchTeachers)
 <template>
   <MainLayout title="Profesores" activeMenu="teachers">
     <div class="flex justify-end mb-4">
-      <Button
-        v-if="authStore.isTeacher"
-        @handleClick="openCreateModal()"
-      >
+      <BaseButton v-if="authStore.isTeacher" @handleClick="openCreateModal()">
         + Añadir profesor
-      </Button>
+      </BaseButton>
     </div>
 
     <div v-if="isLoading" class="text-center text-gray-500">Cargando profesores...</div>
@@ -129,8 +124,8 @@ onMounted(fetchTeachers)
           <td class="px-4 py-2 border-b">{{ teacher.email }}</td>
           <td class="px-4 py-2 text-right border-b">
             <div class="flex gap-x-2.5 justify-end">
-              <Button @handleClick="openViewModal(teacher)" size="sm">Ver</Button>
-              <Button @handleClick="handleDelete(teacher)" size="sm" type="danger">Eliminar</Button>
+              <BaseButton @handleClick="openViewModal(teacher)" size="sm">Ver</BaseButton>
+              <BaseButton @handleClick="handleDelete(teacher)" size="sm" type="danger">Eliminar</BaseButton>
             </div>
           </td>
         </tr>
@@ -180,14 +175,14 @@ onMounted(fetchTeachers)
         <div if="errorFormMessage" class="text-red-500">{{ errorFormMessage }}</div>
 
         <div class="flex justify-end gap-x-2">
-          <Button @handleClick="showModal = false" type="default">Cancelar</Button>
-          <Button
+          <BaseButton @handleClick="showModal = false" type="default">Cancelar</BaseButton>
+          <BaseButton
             @handleClick="saveUser"
             :is-disabled="isSaving"
             :class="{ 'opacity-50 cursor-not-allowed': isSaving }"
           >
             {{ isSaving ? 'Guardando...' : 'Guardar' }}
-          </Button>
+          </BaseButton>
         </div>
       </div>
     </div>

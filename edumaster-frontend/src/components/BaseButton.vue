@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed } from 'vue'
 
 const props = defineProps({
   type: {
@@ -14,15 +14,15 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-});
+})
 
 const computedClasses = computed(() => {
-  let baseClasses = 'font-medium transition rounded-lg';
+  let baseClasses = 'font-medium transition rounded-lg'
 
   if (props.isDisabled) {
-    baseClasses += ` opacity-50 cursor-not-allowed`;
+    baseClasses += ` opacity-50 cursor-not-allowed`
   } else {
-    baseClasses += ` cursor-pointer`;
+    baseClasses += ` cursor-pointer`
   }
 
   const typeClasses = {
@@ -31,24 +31,20 @@ const computedClasses = computed(() => {
     default: 'bg-gray-400 hover:bg-gray-500 text-white',
     success: 'bg-teal-500 hover:bg-teal-600 text-white',
     danger: 'bg-rose-500 hover:bg-rose-600 text-white',
-  };
+  }
 
   const sizeClasses = {
     sm: 'text-sm px-3 py-2',
     md: 'text-base px-4 py-2',
     lg: 'text-lg px-6 py-3',
-  };
+  }
 
-
-  return `${baseClasses} ${typeClasses[props.type] || typeClasses.primary} ${sizeClasses[props.size] || sizeClasses.md}`;
-});
+  return `${baseClasses} ${typeClasses[props.type] || typeClasses.primary} ${sizeClasses[props.size] || sizeClasses.md}`
+})
 </script>
 
 <template>
-  <button
-    :disabled="isDisabled"
-    @click="$emit('handleClick')"
-    :class="computedClasses">
+  <button :disabled="isDisabled" @click="$emit('handleClick')" :class="computedClasses">
     <slot />
   </button>
 </template>

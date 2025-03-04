@@ -4,7 +4,7 @@ import api from '../services/api'
 import { useAuthStore } from '../stores/auth'
 import MainLayout from '../layouts/MainLayout.vue'
 import KPI from '../components/KPI.vue'
-import Button from '../components/Button.vue'
+import BaseButton from '../components/BaseButton.vue'
 
 const authStore = useAuthStore()
 
@@ -24,7 +24,7 @@ const fetchStudents = async () => {
   try {
     const response = await api.get('/users')
     students.value = response.data
-  } catch (error) {
+  } catch {
     errorMessage.value = 'Error al cargar alumnos'
   } finally {
     isLoading.value = false
@@ -41,7 +41,7 @@ const fetchTotals = async (userId) => {
       useAuthStore().logout()
       window.location.reload()
     }
-    
+
     console.error('Failed to fetch totals:', error)
   }
 }
@@ -56,9 +56,9 @@ const closeModal = () => {
 const openViewModal = (student) => {
   isViewing.value = true
   errorFormMessage.value = null
-  newUser.value = {...student}
+  newUser.value = { ...student }
   fetchTotals(student.user_id)
-  
+
   showModal.value = true
 }
 
@@ -72,7 +72,8 @@ const openCreateModal = () => {
 const validatePassword = (event) => {
   const password = event.target.value
   if (!password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/)) {
-    errorsForm.password = 'La contraseña debe contener al menos una letra mayúscula, una letra minúscula y un número'
+    errorsForm.password =
+      'La contraseña debe contener al menos una letra mayúscula, una letra minúscula y un número'
   } else {
     delete errorsForm.password
   }
@@ -104,10 +105,7 @@ const createUser = async (user) => {
 }
 
 const saveUser = async () => {
-  if (
-    typeof newUser.value.user_id !== 'undefined' &&
-    newUser.value.user_id !== null
-  ) {
+  if (typeof newUser.value.user_id !== 'undefined' && newUser.value.user_id !== null) {
     await updateUser(newUser.value)
   } else {
     await createUser(newUser.value)
@@ -122,7 +120,7 @@ const handleDelete = async (student) => {
   if (!confirm('¿Estás seguro de eliminar este alumno?')) {
     return
   }
-  
+
   await deleteStudent(student)
   fetchStudents()
 }
@@ -133,12 +131,7 @@ onMounted(fetchStudents)
 <template>
   <MainLayout title="Alumnos" activeMenu="students">
     <div class="flex justify-end mb-4">
-      <Button
-        v-if="authStore.isTeacher"
-        @handleClick="openCreateModal()"
-      >
-        + Añadir alumno
-      </Button>
+      <BaseButton v-if="authStore.isTeacher" @handleClick="openCreateModal()"> + Añadir alumno </BaseButton>
     </div>
 
     <div v-if="isLoading" class="text-center text-gray-500">Cargando alumnos...</div>
@@ -157,21 +150,17 @@ onMounted(fetchStudents)
           <td class="px-4 py-2 border-b">{{ student.email }}</td>
           <td class="px-4 py-2 text-right border-b">
             <div class="flex gap-x-2.5 justify-end">
-              <Button
-                v-if="authStore.isTeacher"
-                @handleClick="openViewModal(student)"
-                size="sm"
-              >
+              <BaseButton v-if="authStore.isTeacher" @handleClick="openViewModal(student)" size="sm">
                 Ver
-              </Button>
-              <Button
+              </BaseButton>
+              <BaseButton
                 v-if="authStore.isTeacher"
                 @handleClick="handleDelete(student)"
                 size="sm"
                 type="danger"
               >
                 Eliminar
-              </Button>
+              </BaseButton>
             </div>
           </td>
         </tr>
@@ -225,19 +214,14 @@ onMounted(fetchStudents)
         <div if="errorFormMessage" class="text-red-500">{{ errorFormMessage }}</div>
 
         <div class="flex justify-end gap-x-2">
-          <Button
-            @handleClick="closeModal"
-            type="default"
-          >
-            Cancelar
-          </Button>
-          <Button
+          <BaseButton @handleClick="closeModal" type="default"> Cancelar </BaseButton>
+          <BaseButton
             @handleClick="saveUser"
             :is-disabled="isSaving"
             :class="{ 'opacity-50 cursor-not-allowed': isSaving }"
           >
             {{ isSaving ? 'Guardando...' : 'Guardar' }}
-          </Button>
+          </BaseButton>
         </div>
       </div>
     </div>
