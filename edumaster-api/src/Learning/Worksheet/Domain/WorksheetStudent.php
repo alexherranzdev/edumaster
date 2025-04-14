@@ -8,26 +8,26 @@ use Edumaster\Learning\User\Domain\ValueObject\UserId;
 use Edumaster\Learning\Worksheet\Domain\ValueObject\WorksheetId;
 use Edumaster\Learning\Worksheet\Domain\ValueObject\WorksheetStatus;
 
-class WorksheetStudent
+final class WorksheetStudent
 {
-  public function __construct(
-    private WorksheetId $worksheetId,
-    private UserId $studentId,
-    private WorksheetStatus $status
-  ) {}
+	public function __construct(
+		private WorksheetId $worksheetId,
+		private UserId $studentId,
+		private WorksheetStatus $status
+	) {}
 
-  public function worksheetId(): WorksheetId
-  {
-    return $this->worksheetId;
-  }
+	public function worksheetId(): WorksheetId
+	{
+		return $this->worksheetId;
+	}
 
-  public function studentId(): UserId
-  {
-    return $this->studentId;
-  }
+	public function studentId(): UserId
+	{
+		return $this->studentId;
+	}
 
-  public function status(): WorksheetStatus
-  {
-    return $this->status;
-  }
+	public function status(): WorksheetStatus
+	{
+		return $this->status;
+	}
 }

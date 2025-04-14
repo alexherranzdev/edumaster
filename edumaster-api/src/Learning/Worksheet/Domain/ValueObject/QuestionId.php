@@ -6,4 +6,4 @@ namespace Edumaster\Learning\Worksheet\Domain\ValueObject;
 
 use Edumaster\Shared\ValueObject\Uuid;
 
-class QuestionId extends Uuid {}
+final class QuestionId extends Uuid {}

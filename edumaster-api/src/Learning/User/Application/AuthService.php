@@ -5,27 +5,28 @@ declare(strict_types=1);
 namespace Edumaster\Learning\User\Application;
 
 use Edumaster\Learning\User\Domain\UserRepository;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 
-class AuthService
+final class AuthService
 {
-  public function __construct(private UserRepository $userRepository) {}
+	public function __construct(private UserRepository $userRepository) {}
 
-  public function login(array $data): array
-  {
-    if (!Auth::attempt($data)) {
-      throw new \Exception("Credenciales incorrectas");
-    }
+	public function login(array $data): array
+	{
+		if (!Auth::attempt($data)) {
+			throw new Exception('Credenciales incorrectas');
+		}
 
-    $user = Auth::user();
-    return [
-      'token' => $user->createToken('API Token')->plainTextToken,
-      'user' => $user
-    ];
-  }
+		$user = Auth::user();
+		return [
+			'token' => $user->createToken('API Token')->plainTextToken,
+			'user' => $user,
+		];
+	}
 
-  public function logout(): void
-  {
-    Auth::user()->tokens()->delete();
-  }
+	public function logout(): void
+	{
+		Auth::user()->tokens()->delete();
+	}
 }

@@ -6,12 +6,12 @@ namespace Edumaster\Learning\Worksheet\Infrastructure\Persistence;
 
 use Illuminate\Database\Eloquent\Model;
 
-class EloquentWorksheetStudent extends Model
+final class EloquentWorksheetStudent extends Model
 {
-  protected $table = 'worksheet_students';
-  protected $fillable = ['worksheet_id', 'student_id', 'status'];
+	protected $table = 'worksheet_students';
+	protected $fillable = ['worksheet_id', 'student_id', 'status'];
 
-  protected $casts = [
-    'status' => 'string'
-  ];
+	protected $casts = [
+		'status' => 'string',
+	];
 }

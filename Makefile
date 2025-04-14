@@ -1,10 +1,10 @@
 .PHONY: start stop
 
-DOCKER_COMPOSE = docker-compose
+DOCKER_COMPOSE = docker compose
 
 start:
 	@echo "🚀 Construyendo los contenedores..."
-	$(DOCKER_COMPOSE) build --no-cache
+	$(DOCKER_COMPOSE) build --no-cache --progress=plain
 	@echo "📦 Levantando los contenedores..."
 	$(DOCKER_COMPOSE) up -d
 	@echo "✅ Proyecto levantado correctamente."

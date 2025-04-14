@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use Edumaster\Learning\User\Domain\UserRepository;
@@ -12,24 +14,24 @@ use Edumaster\Learning\Worksheet\Infrastructure\Persistence\EloquentWorksheetRes
 use Edumaster\Learning\Worksheet\Infrastructure\Persistence\EloquentWorksheetStudentRepository;
 use Illuminate\Support\ServiceProvider;
 
-class AppServiceProvider extends ServiceProvider
+final class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
-    public function register(): void
-    {
-        $this->app->bind(UserRepository::class, EloquentUserRepository::class);
-        $this->app->bind(WorksheetRepository::class, EloquentWorksheetRepository::class);
-        $this->app->bind(WorksheetResponseRepository::class, EloquentWorksheetResponseRepository::class);
-        $this->app->bind(WorksheetStudentRepository::class, EloquentWorksheetStudentRepository::class);
-    }
+	/**
+	 * Register any application services.
+	 */
+	public function register(): void
+	{
+		$this->app->bind(UserRepository::class, EloquentUserRepository::class);
+		$this->app->bind(WorksheetRepository::class, EloquentWorksheetRepository::class);
+		$this->app->bind(WorksheetResponseRepository::class, EloquentWorksheetResponseRepository::class);
+		$this->app->bind(WorksheetStudentRepository::class, EloquentWorksheetStudentRepository::class);
+	}
 
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
-    {
-        //
-    }
+	/**
+	 * Bootstrap any application services.
+	 */
+	public function boot(): void
+	{
+		//
+	}
 }

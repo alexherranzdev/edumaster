@@ -9,24 +9,24 @@ use Edumaster\Learning\User\Domain\UserRepository;
 use Edumaster\Shared\ValueObject\Email;
 use Illuminate\Support\Facades\Hash;
 
-class UpdateUserService
+final class UpdateUserService
 {
-  public function __construct(private UserRepository $repository) {}
+	public function __construct(private UserRepository $repository) {}
 
-  public function execute(string $id, array $data): void
-  {
-    $user = $this->repository->findById($id);
-    if (!$user) {
-      throw new UserNotFoundException($id);
-    }
+	public function execute(string $id, array $data): void
+	{
+		$user = $this->repository->findById($id);
+		if (!$user) {
+			throw new UserNotFoundException($id);
+		}
 
-    $user->name = $data['name'];
-    $user->email = (new Email($data['email']))->value();
+		$user->name = $data['name'];
+		$user->email = (new Email($data['email']))->value();
 
-    if (isset($data['password'])) {
-      $user->password = Hash::make($data['password']);
-    }
+		if (isset($data['password'])) {
+			$user->password = Hash::make($data['password']);
+		}
 
-    $this->repository->save($user);
-  }
+		$this->repository->save($user);
+	}
 }

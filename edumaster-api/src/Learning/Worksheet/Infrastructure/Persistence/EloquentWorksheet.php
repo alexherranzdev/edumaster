@@ -8,20 +8,20 @@ use Database\Factories\WorksheetFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class EloquentWorksheet extends Model
+final class EloquentWorksheet extends Model
 {
-  use HasFactory;
+	use HasFactory;
 
-  protected $table = 'worksheets';
+	protected $table = 'worksheets';
 
-  protected $fillable = ['worksheet_id', 'teacher_id', 'title', 'description'];
+	protected $fillable = ['worksheet_id', 'teacher_id', 'title', 'description'];
 
-  protected $casts = [
-    'words' => 'array',
-  ];
+	protected $casts = [
+		'words' => 'array',
+	];
 
-  protected static function newFactory()
-  {
-    return WorksheetFactory::new();
-  }
+	protected static function newFactory()
+	{
+		return WorksheetFactory::new();
+	}
 }

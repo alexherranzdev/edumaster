@@ -8,18 +8,18 @@ use Edumaster\Learning\User\Application\List\ListUsersByRoleService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class ListUserController
+final class ListUserController
 {
-  public function __construct(private ListUsersByRoleService $service) {}
+	public function __construct(private ListUsersByRoleService $service) {}
 
-  public function listByRole(Request $request): JsonResponse
-  {
-    $users = $this->service->execute(
-      $request->query('role', 'student'),
-      (int)$request->query('limit', 100),
-      (int)$request->query('offset', 0)
-    );
+	public function listByRole(Request $request): JsonResponse
+	{
+		$users = $this->service->execute(
+			$request->query('role', 'student'),
+			(int) $request->query('limit', 100),
+			(int) $request->query('offset', 0)
+		);
 
-    return response()->json($users);
-  }
+		return response()->json($users);
+	}
 }

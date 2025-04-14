@@ -8,22 +8,22 @@ use Illuminate\Support\Str;
 
 trait HasUuid
 {
-  protected static function bootHasUuid()
-  {
-    static::creating(function ($model) {
-      if (!$model->user_id) {
-        $model->user_id = Str::uuid()->toString();
-      }
-    });
-  }
+	protected static function bootHasUuid()
+	{
+		static::creating(function ($model) {
+			if (!$model->user_id) {
+				$model->user_id = Str::uuid()->toString();
+			}
+		});
+	}
 
-  public function getIncrementing(): bool
-  {
-    return false;
-  }
+	public function getIncrementing(): bool
+	{
+		return false;
+	}
 
-  public function getKeyType(): string
-  {
-    return 'string';
-  }
+	public function getKeyType(): string
+	{
+		return 'string';
+	}
 }

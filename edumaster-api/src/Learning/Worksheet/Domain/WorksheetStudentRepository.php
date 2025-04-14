@@ -6,5 +6,5 @@ namespace Edumaster\Learning\Worksheet\Domain;
 
 interface WorksheetStudentRepository
 {
-  public function save(WorksheetStudent $response): void;
+	public function save(WorksheetStudent $response): void;
 }
