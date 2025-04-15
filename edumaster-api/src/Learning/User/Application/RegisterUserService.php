@@ -8,7 +8,7 @@ use Edumaster\Learning\User\Domain\Exception\UserAlreadyExistsException;
 use Edumaster\Learning\User\Domain\User;
 use Edumaster\Learning\User\Domain\UserRepository;
 use Edumaster\Learning\User\Domain\ValueObject\UserId;
-use Edumaster\Shared\ValueObject\Email;
+use Edumaster\Shared\Domain\ValueObject\Email;
 use Illuminate\Support\Facades\Hash;
 use InvalidArgumentException;
 

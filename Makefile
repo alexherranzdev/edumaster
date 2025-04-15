@@ -13,3 +13,8 @@ stop:
 	@echo "🛑 Deteniendo y eliminando los contenedores..."
 	$(DOCKER_COMPOSE) down
 	@echo "✅ Contenedores detenidos y eliminados."
+
+restart:
+	@echo "🚀 Reiniciando los contenedores..."
+	$(DOCKER_COMPOSE) stop
+	$(DOCKER_COMPOSE) start

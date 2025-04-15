@@ -7,6 +7,7 @@ use Edumaster\Learning\User\Infrastructure\Http\ListUserController;
 use Edumaster\Learning\User\Infrastructure\Http\UpdateUserController;
 use Edumaster\Learning\Worksheet\Infrastructure\Http\WorksheetController;
 use Edumaster\Learning\Worksheet\Infrastructure\Http\WorksheetResponseController;
+use Edumaster\RoomFlow\Room\Infrastructure\Http\CreateRoomController;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -15,7 +16,10 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout']);
 
+
 Route::middleware('auth:sanctum')->group(function () {
+  Route::post('/rooms', [CreateRoomController::class, 'execute']);
+
   Route::get('/stats/totals', [StatsController::class, 'getTotals']);
 
   Route::get('/users', [ListUserController::class, 'listByRole']);

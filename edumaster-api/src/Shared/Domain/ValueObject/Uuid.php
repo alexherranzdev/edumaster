@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Edumaster\Shared\ValueObject;
+namespace Edumaster\Shared\Domain\ValueObject;
 
 use Ramsey\Uuid\Uuid as RamseyUuid;
 use Stringable;

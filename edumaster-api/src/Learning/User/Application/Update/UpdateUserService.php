@@ -6,7 +6,7 @@ namespace Edumaster\Learning\User\Application\Update;
 
 use Edumaster\Learning\User\Domain\Exception\UserNotFoundException;
 use Edumaster\Learning\User\Domain\UserRepository;
-use Edumaster\Shared\ValueObject\Email;
+use Edumaster\Shared\Domain\ValueObject\Email;
 use Illuminate\Support\Facades\Hash;
 
 final class UpdateUserService

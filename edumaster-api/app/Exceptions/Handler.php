@@ -18,7 +18,7 @@ final class Handler extends ExceptionHandler
 	/**
 	 * Handle unauthenticated user exception.
 	 *
-	 * @param  \Illuminate\Http\Request  $request
+	 * @param  Request  $request
 	 * @param  AuthenticationException  $exception
 	 * @return \Symfony\Component\HttpFoundation\Response
 	 */
